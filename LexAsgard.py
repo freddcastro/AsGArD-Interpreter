@@ -49,20 +49,69 @@ tokens = (
     "TkTrue",
     "TkFalse",
     "TkCanvasLit",
-    "Reservada",
-    "Comentario"
+    "ID",
+    "Comentario",
+    "TkIdent"
 )
 
 tokens += tuple(reserved.values())
 
-def t_Reservada(t):
-    r'[a-zA-Z_]+'
-    t.type = reserved.get(t.value)   # Buscamos las palabras reservadas
+def t_TkIdent(t):
+    r'[a-zA-Z][a-zA-Z0-9]*'
+    t.type = reserved.get(t.value, 'ID')   # Buscamos las palabras reservadas
     return t
+
+t_TkNumLit = r'[0-9]+'
 
 def t_Comentario(t):
     r'\{\-(.|\n)*?\-\}'
     pass
+
+# Definimos las demás reglas para los tokens sencillos
+t_TkComa = r','
+
+#t_TkPuntoYComa = r'\;'
+
+#t_TkParAbre = r'\('
+
+t_TkParCierra = r'\)'
+
+t_TkMas = r'\+'
+
+t_TkMenos = r'\-'
+
+t_TkMult = r'\*'
+
+t_TkDiv = r'\/'
+
+t_TkMod = r'\%'
+
+t_TkConjuncion = r'\/\\'
+
+#t_TkDisjuncion = r'\\\/'
+
+#t_TkNegacion = r'\^'
+
+t_TkMenor = r'\<'
+
+t_TkMenorIgual = r'\<='
+
+#t_TkMayor = r'\>'
+
+#t_TkMayorIgual = r'\>='
+
+t_TkIgual = r'\='
+
+t_TkDesigual = r'\!='
+
+t_TkConcatHorizontal = r'\:'
+
+t_TkConcatVertical = r'\|'
+
+t_TkRotacion = r'\$'
+
+#t_TkTransposicion = r'\''
+
 
 # Ignoramos los espacios, los tabuladores y los saltos de línea
 t_ignore  = ' \t\n+'
@@ -78,12 +127,11 @@ lexer = lex.lex()
 
 # De acá para abajo es el testing
 data = '''
+using contador begin
+{- Asignar al contador
+el valor 35. -}
+contador := 35
 end
-begin
-of type
-{- Asignar al 35
-el valor contador? -}
-
 '''
 
 lexer.input(data)
