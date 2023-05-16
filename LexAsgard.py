@@ -64,10 +64,10 @@ def t_Comentario(t):
     r'\{\-(.|\n)*?\-\}'
     pass
 
-# A string containing ignored characters (spaces and tabs)
+# Ignoramos los espacios, los tabuladores y los saltos de línea
 t_ignore  = ' \t\n+'
 
-# Error handling rule
+# Regla para manejar los errores (provisional)
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
@@ -75,6 +75,8 @@ def t_error(t):
 
 lexer = lex.lex()
 
+
+# De acá para abajo es el testing
 data = '''
 end
 begin
@@ -84,7 +86,6 @@ el valor contador? -}
 
 '''
 
-# Give the lexer some input
 lexer.input(data)
 
 # Tokenize
