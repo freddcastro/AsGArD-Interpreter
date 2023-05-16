@@ -1,23 +1,24 @@
 import ply.lex as lex
 
+# Diccionario para las palabras reservadas, donde tenemos como llaves las que están en el código y como valores las resultantes de la especificación
 
-reserved = (
-    "using",
-    "begin",
-    "end",
-    "of",
-    "type",
-    "from"
-    "to"
-    "repeat",
-    "then",
-    "otherwise",
-    "done",
-    "print",
-    "while",
-    "read",
-    "with",
-)
+reserved = {
+    "using": "TkUsing",
+    "begin": "TkBegin",
+    "end": "TkEnd",
+    "of": "TkOf",
+    "type": "TkType",
+    "from": "TkFrom",
+    "to": "TkTo",
+    "repeat": "TkRepeat",
+    "then": "TkThen",
+    "otherwise": "TkOtherwise",
+    "done": "TkDone",
+    "print": "TkPrint",
+    "while": "TkWhile",
+    "read": "TkRead",
+    "with": "TkWith",
+}
 
 tokens = (
     "TkComa",
@@ -48,15 +49,15 @@ tokens = (
     "TkTrue",
     "TkFalse",
     "TkCanvasLit",
-    "ID",
+    "Reservada",
     "Comentario"
 )
 
-tokens += reserved
+tokens += tuple(reserved.values())
 
-def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = "Tk" + reserved[reserved.index(t.value)].capitalize()   # Check for reserved words
+def t_Reservada(t):
+    r'[a-zA-Z_]+'
+    t.type = reserved.get(t.value)   # Buscamos las palabras reservadas
     return t
 
 def t_Comentario(t):
