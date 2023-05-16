@@ -22,7 +22,7 @@ reserved = {
 
 tokens = (
     "TkComa",
-    "TkPuntoYComa"
+    "TkPuntoYComa",
     "TkParAbre",
     "TkParCierra",
     "TkMas",
@@ -31,18 +31,18 @@ tokens = (
     "TkDiv",
     "TkMod",
     "TkConjuncion",
-    "TkDisjuncion"
+    "TkDisjuncion",
     "TkNegacion",
     "TkMenor",
     "TkMenorIgual",
-    "TkMayor"
+    "TkMayor",
     "TkMayorIgual",
     "TkIgual",
     "TkDesigual",
     "TkConcatHorizontal",
     "TkConcatVertical",
     "TkRotacion",
-    "TkTransposicion"
+    "TkTransposicion",
     "TkAsignacion",
     "TkIdent",
     "TkNumLit",
@@ -72,7 +72,7 @@ t_TkComa = r','
 
 #t_TkPuntoYComa = r'\;'
 
-#t_TkParAbre = r'\('
+t_TkParAbre = r'\('
 
 t_TkParCierra = r'\)'
 
@@ -88,17 +88,17 @@ t_TkMod = r'\%'
 
 t_TkConjuncion = r'\/\\'
 
-#t_TkDisjuncion = r'\\\/'
+t_TkDisjuncion = r'\\\/'
 
-#t_TkNegacion = r'\^'
+t_TkNegacion = r'\^'
 
 t_TkMenor = r'\<'
 
 t_TkMenorIgual = r'\<='
 
-#t_TkMayor = r'\>'
+t_TkMayor = r'\>'
 
-#t_TkMayorIgual = r'\>='
+t_TkMayorIgual = r'\>='
 
 t_TkIgual = r'\='
 
@@ -110,7 +110,7 @@ t_TkConcatVertical = r'\|'
 
 t_TkRotacion = r'\$'
 
-#t_TkTransposicion = r'\''
+t_TkTransposicion = r'\''
 
 
 # Ignoramos los espacios, los tabuladores y los saltos de línea
