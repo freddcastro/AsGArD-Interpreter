@@ -49,9 +49,10 @@ tokens = (
     "TkTrue",
     "TkFalse",
     "TkCanvasLit",
+    "TkIdent",
     "ID",
     "Comentario",
-    "TkIdent"
+    
 )
 
 tokens += tuple(reserved.values())
@@ -111,6 +112,8 @@ t_TkConcatVertical = r'\|'
 t_TkRotacion = r'\$'
 
 t_TkTransposicion = r'\''
+
+t_TkAsignacion = r'\:='
 
 
 # Ignoramos los espacios, los tabuladores y los saltos de línea
