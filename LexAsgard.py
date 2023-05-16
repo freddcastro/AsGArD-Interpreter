@@ -62,6 +62,10 @@ def t_TkIdent(t):
     t.type = reserved.get(t.value, 'ID')   # Buscamos las palabras reservadas
     return t
 
+def t_TkCanvasLit(t):
+    r'<empty>|<[\\\|\/\.\_]>'
+    return t
+
 t_TkNumLit = r'[0-9]+'
 
 def t_Comentario(t):
@@ -130,7 +134,7 @@ lexer = lex.lex()
 
 # De acá para abajo es el testing
 data = '''
-using contador begin
+using contador begin <o>
 {- Asignar al contador
 el valor 35. -}
 contador := 35
