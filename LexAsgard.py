@@ -21,37 +21,26 @@ reserved = {
 }
 
 tokens = (
-    "TkComa",
-    "TkPuntoYComa",
-    "TkParAbre",
-    "TkParCierra",
-    "TkMas",
-    "TkMenos",
-    "TkMult",
-    "TkDiv",
-    "TkMod",
-    "TkConjuncion",
-    "TkDisjuncion",
-    "TkNegacion",
-    "TkMenor",
-    "TkMenorIgual",
-    "TkMayor",
-    "TkMayorIgual",
-    "TkIgual",
-    "TkDesigual",
-    "TkConcatHorizontal",
-    "TkConcatVertical",
-    "TkRotacion",
-    "TkTransposicion",
+    # Separadores , ; ( )
+    "TkComa", "TkPuntoYComa", "TkParAbre", "TkParCierra",
+
+    # Operadores Aritméticos + - * / %
+    "TkMas",  "TkMenos", "TkMult", "TkDiv", "TkMod",
+
+    # Operadores Booleanos /\ \/ ^
+    "TkConjuncion", "TkDisjuncion", "TkNegacion",
+
+    # Operadores relacionales < <= > >= = !=
+    "TkMenor", "TkMenorIgual", "TkMayor", "TkMayorIgual", "TkIgual", "TkDesigual",
+
+    # Operadores de Lienzo : | $ '
+    "TkConcatHorizontal",  "TkConcatVertical",  "TkRotacion",  "TkTransposicion",
+
+    # Operador de asignación :=
     "TkAsignacion",
-    "TkIdent",
-    "TkNumLit",
-    "TkTrue",
-    "TkFalse",
-    "TkCanvasLit",
-    "TkIdent",
-    "ID",
-    "Comentario",
+    
+    # Identificadores
+    "TkIdent", "TkNumLit", "TkTrue", "TkFalse", "TkCanvasLit", "TkIdent", "Comentario",
     
 )
 
@@ -66,7 +55,7 @@ errores = []
 
 def t_TkIdent(t):
     r'[a-zA-Z][a-zA-Z0-9]*'
-    t.type = reserved.get(t.value, 'ID')   # Buscamos las palabras reservadas
+    t.type = reserved.get(t.value, 'TkIdent')   # Buscamos las palabras reservadas
     return t
 
 def t_TkCanvasLit(t):
