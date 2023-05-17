@@ -23,10 +23,10 @@ if bool(errores) is False:
     # La lista de errores está vacía, es decir, no hay errores.
     # Asi, imprimimos los tokens encontrados
     for token in tokens_salida:
-        if token.type == "TkNumLit" or token.type == "TkIdent":
+        if token.type == "TkNumLit":
             print(token.type + f"({token.value})", end=" ")
             continue
-        if token.type == "TkIdent":
+        if token.type == "TkIdent" or token.type == "TkCanvasLit":
             print(token.type + f'("{token.value}")', end=" ")
             continue
         else:
