@@ -69,6 +69,8 @@ def t_Comentario(t):
     pass
 
 # Definimos las demás reglas para los tokens sencillos
+
+# Separadores
 t_TkComa = r','
 
 t_TkPuntoYComa = r'\;'
@@ -77,6 +79,7 @@ t_TkParAbre = r'\('
 
 t_TkParCierra = r'\)'
 
+# Operadores Aritméticos
 t_TkMas = r'\+'
 
 t_TkMenos = r'\-'
@@ -87,12 +90,14 @@ t_TkDiv = r'\/'
 
 t_TkMod = r'\%'
 
+# Operadores Lógicos
 t_TkConjuncion = r'\/\\'
 
 t_TkDisjuncion = r'\\\/'
 
 t_TkNegacion = r'\^'
 
+# Operadores Relacionales
 t_TkMenor = r'\<'
 
 t_TkMenorIgual = r'\<='
@@ -113,6 +118,7 @@ t_TkRotacion = r'\$'
 
 t_TkTransposicion = r'\''
 
+# Operador Asignación
 t_TkAsignacion = r'\:='
 
 
