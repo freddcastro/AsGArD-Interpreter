@@ -75,7 +75,7 @@ def t_Comentario(t):
 # Definimos las demás reglas para los tokens sencillos
 t_TkComa = r','
 
-#t_TkPuntoYComa = r'\;'
+t_TkPuntoYComa = r'\;'
 
 t_TkParAbre = r'\('
 
@@ -123,29 +123,79 @@ t_TkAsignacion = r'\:='
 # Ignoramos los espacios, los tabuladores y los saltos de línea
 t_ignore  = ' \t\n+'
 
-# Regla para manejar los errores (provisional)
+# Calculamos cada línea
+def t_nuevalinea(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+
+# Calculamos las columnas
+#     input es el texto ingresado
+#     token es la instancia del token a buscar
+
+def find_column(input, token):
+    comienzo = input.rfind('\n', 0, token.lexpos) + 1
+    return (token.lexpos - comienzo) + 1
+
+# Lista para almacenar los tokens y valores de cada error
+errores = []
+
+# Regla para manejar los errores, almacenandolos en una lista
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
+    errores.append(t)
     t.lexer.skip(1)
 
-
-lexer = lex.lex()
+# Creamos el lexer, silenciando los warnings
+lexer = lex.lex(errorlog=lex.NullLogger())
 
 
 # De acá para abajo es el testing
 data = '''
-using contador begin <o>
-{- Asignar al contador
-el valor 35. -}
-contador := 35
+using contador! begin
+  contador ?:= 35
 end
 '''
 
 lexer.input(data)
 
-# Tokenize
+# Lista de tokens para imprimir al final
+tokens_salida = []
+
+# Primeramente, creamos los tokens
 while True:
+    # Creamos el token
     tok = lexer.token()
+
     if not tok: 
-        break      # No more input
-    print(tok)
+        break   # No hay más input para crear tokens    
+
+    # Dependiendo de su tipo, lo almacenamos en errores o en la salida normal
+    if tok.type == "error":
+        errores.append(tok)
+    else:
+        tokens_salida.append(tok)
+
+
+# Ahora, realizamos la verificación y el printing correspondiente
+
+# Las listas vacias en python evaluan a false
+if bool(errores) is False:
+    # La lista de errores está vacía, es decir, no hay errores.
+    # Asi, imprimimos los tokens encontrados
+    for token in tokens_salida:
+        if token.type == "TkNumLit":
+            print(token.type + f"({token.value})", end=" ")
+            continue
+        if token.type == "ID":
+            print(f'TkIdent("{token.value}")', end=" ")
+            continue
+        else:
+            print(token.type, end=" ")
+            continue
+
+    print("")
+else:
+    # La lista de errores NO está vacía
+    # Así, imprimimos los errores encontrados
+    for error in errores:
+        print(f'Error: Caracter inesperado "{error.value[0]}" en la fila {error.lineno}, columna {find_column(data, error)}')
+
