@@ -1,15 +1,10 @@
 from LexAsgard import lexer, token_gen, errores, find_column, tokens_salida
+import sys
 
-# Acá recibimos los datos del script
+# Acá recibimos la información por entrada estándar
+data = sys.argv[1]
 
-#invocamos al lexer
-
-data = '''
-using contador begin
-  contador := 35
-end
-'''
-
+# Invocamos al lexer, pasándole la información
 lexer.input(data)
 
 # Generamos los tokens luego de pasarle los datos al lexer
