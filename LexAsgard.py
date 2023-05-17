@@ -57,6 +57,13 @@ tokens = (
 
 tokens += tuple(reserved.values())
 
+# Lista de tokens para imprimir al final
+tokens_salida = []
+
+# Lista para almacenar los tokens y valores de cada error
+errores = []
+
+
 def t_TkIdent(t):
     r'[a-zA-Z][a-zA-Z0-9]*'
     t.type = reserved.get(t.value, 'ID')   # Buscamos las palabras reservadas
@@ -128,17 +135,6 @@ def t_nuevalinea(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
-# Calculamos las columnas
-#     input es el texto ingresado
-#     token es la instancia del token a buscar
-
-def find_column(input, token):
-    comienzo = input.rfind('\n', 0, token.lexpos) + 1
-    return (token.lexpos - comienzo) + 1
-
-# Lista para almacenar los tokens y valores de cada error
-errores = []
-
 # Regla para manejar los errores, almacenandolos en una lista
 def t_error(t):
     errores.append(t)
@@ -148,54 +144,25 @@ def t_error(t):
 lexer = lex.lex(errorlog=lex.NullLogger())
 
 
-# De acá para abajo es el testing
-data = '''
-using contador! begin
-  contador ?:= 35
-end
-'''
+def token_gen(lexer, tokens_salida, errores):
+    # Primeramente, creamos los tokens
+    while True:
+        # Creamos el token
+        tok = lexer.token()
 
-lexer.input(data)
+        if not tok: 
+            break   # No hay más input para crear tokens    
 
-# Lista de tokens para imprimir al final
-tokens_salida = []
-
-# Primeramente, creamos los tokens
-while True:
-    # Creamos el token
-    tok = lexer.token()
-
-    if not tok: 
-        break   # No hay más input para crear tokens    
-
-    # Dependiendo de su tipo, lo almacenamos en errores o en la salida normal
-    if tok.type == "error":
-        errores.append(tok)
-    else:
-        tokens_salida.append(tok)
-
-
-# Ahora, realizamos la verificación y el printing correspondiente
-
-# Las listas vacias en python evaluan a false
-if bool(errores) is False:
-    # La lista de errores está vacía, es decir, no hay errores.
-    # Asi, imprimimos los tokens encontrados
-    for token in tokens_salida:
-        if token.type == "TkNumLit":
-            print(token.type + f"({token.value})", end=" ")
-            continue
-        if token.type == "ID":
-            print(f'TkIdent("{token.value}")', end=" ")
-            continue
+        # Dependiendo de su tipo, lo almacenamos en errores o en la salida normal
+        if tok.type == "error":
+            errores.append(tok)
         else:
-            print(token.type, end=" ")
-            continue
+            tokens_salida.append(tok)
 
-    print("")
-else:
-    # La lista de errores NO está vacía
-    # Así, imprimimos los errores encontrados
-    for error in errores:
-        print(f'Error: Caracter inesperado "{error.value[0]}" en la fila {error.lineno}, columna {find_column(data, error)}')
+# Función para calcular el número de columna
+# input es el texto ingresado
+# token es la instancia del token a buscar
 
+def find_column(input, token):
+    comienzo = input.rfind('\n', 0, token.lexpos) + 1
+    return (token.lexpos - comienzo) + 1
