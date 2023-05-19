@@ -138,7 +138,7 @@ def t_error(t):
 # Creamos el lexer, silenciando los warnings
 lexer = lex.lex(errorlog=lex.NullLogger())
 
-
+# Funcion para generar tokens
 def token_gen(lexer, tokens_salida, errores):
     # Primeramente, creamos los tokens
     while True:
