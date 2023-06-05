@@ -123,7 +123,7 @@ t_TkAsignacion = r'\:='
 
 
 # Ignoramos los espacios, los tabuladores y los saltos de línea
-t_ignore  = ' \t\n+'
+t_ignore  = ' \t\n'
 
 # Calculamos cada línea
 def t_nuevalinea(t):
