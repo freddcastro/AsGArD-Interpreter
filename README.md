@@ -13,4 +13,4 @@ El Analizador Lexicográfico, o Lexer, correspondiente a la primera entrega del 
 - **LexAsgard.sh**: Es el script en Bash que se encarga de invocar al script main.py, recibiendo el archivo proporcionado, pasándolo al script de Python y luego imprimiendo la salida del script a salida estándar.
 
 Así, para utilizar el Lexer, debemos ejecutar el Script de la siguiente manera:
-`./main.py < archivo.asg`
+`./LexAsgard.sh < archivo.asg`
