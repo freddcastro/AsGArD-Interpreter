@@ -11,6 +11,7 @@ reserved = {
     "from": "TkFrom",
     "to": "TkTo",
     "repeat": "TkRepeat",
+    "if": "TkIf",
     "then": "TkThen",
     "otherwise": "TkOtherwise",
     "done": "TkDone",
@@ -40,7 +41,7 @@ tokens = (
     "TkAsignacion",
     
     # Identificadores
-    "TkIdent", "TkNumLit", "TkTrue", "TkFalse", "TkCanvasLit", "TkIdent", "Comentario",
+    "TkIdent", "TkNumLit", "TkTrue", "TkFalse", "TkCanvasLit", "Comentario",
     
 )
 
@@ -110,6 +111,7 @@ t_TkIgual = r'\='
 
 t_TkDesigual = r'\!='
 
+# Operadores de Canvas
 t_TkConcatHorizontal = r'\:'
 
 t_TkConcatVertical = r'\|'
@@ -123,7 +125,7 @@ t_TkAsignacion = r'\:='
 
 
 # Ignoramos los espacios, los tabuladores y los saltos de línea
-t_ignore  = ' \t\n'
+t_ignore  = ' \t'
 
 # Calculamos cada línea
 def t_nuevalinea(t):
