@@ -1,4 +1,5 @@
 from LexAsgard import lexer, token_gen, errores, find_column, tokens_salida
+from SintAsgard import  parser
 import sys
 
 # Acá recibimos la información por entrada estándar
@@ -9,7 +10,6 @@ lexer.input(data)
 
 # Generamos los tokens luego de pasarle los datos al lexer
 token_gen(lexer, tokens_salida, errores)
-
 
 # Ahora, realizamos la verificación y el printing correspondiente
 
@@ -34,3 +34,6 @@ else:
     # Así, imprimimos los errores encontrados
     for error in errores:
         print(f'Error: Caracter inesperado "{error.value[0]}" en la fila {error.lineno}, columna {find_column(data, error)}')
+
+# reiniciamos la cuenta de líneas
+lexer.lineno = 1

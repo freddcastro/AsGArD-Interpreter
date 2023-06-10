@@ -1,4 +1,5 @@
 import ply.lex as lex
+import re
 
 # Diccionario para las palabras reservadas, donde tenemos como llaves las que están en el código y como valores las resultantes de la especificación
 
@@ -67,6 +68,10 @@ t_TkNumLit = r'[0-9]+'
 
 def t_Comentario(t):
     r'\{\-(.|\n)*?\-\}'
+    # Debemos buscar los saltos de línea en la expresión
+    saltos_de_linea = len([m.start() for m in re.finditer('\n', t.value)])
+    # Los añadimos al lexer
+    t.lexer.lineno += saltos_de_linea
     pass
 
 # Definimos las demás reglas para los tokens sencillos
