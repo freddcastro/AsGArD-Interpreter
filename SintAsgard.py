@@ -250,12 +250,17 @@ def p_expresion_canvaslit(p):
     p[0] = ExpUnaria(None, p[1], 'lienzo')
 
 
+# Funcion local para el número de columnas
+def col_num(input, lexpos):
+    comienzo = input.rfind('\n', 0, lexpos) + 1
+    return (lexpos - comienzo) + 2
 
 # Manejamos los errores para cada regla TODO mejorar para cada caso, que sea más descriptivo, el num de columna esta mal
 def p_instruccion_asignacion_error(p):
     'instruccion : TkIdent TkAsignacion error'
-    print(f"Asignación Errónea en línea {p.lineno(3)}, columna {p.lexpos(3)}")
+    
+    print(f"Asignación Errónea en línea {p.lineno(3)}, columna {col_num(p.lexer.lexdata, p.lexpos(3))}")
 
-# Build the parser
+# Construimos el parser
 parser = yacc.yacc()
 

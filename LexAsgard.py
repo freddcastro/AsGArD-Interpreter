@@ -167,4 +167,4 @@ def token_gen(lexer, tokens_salida, errores):
 
 def find_column(input, token):
     comienzo = input.rfind('\n', 0, token.lexpos) + 1
-    return (token.lexpos - comienzo) + 1
+    return (token.lexpos - comienzo) + 2
