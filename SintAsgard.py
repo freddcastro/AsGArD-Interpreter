@@ -173,15 +173,20 @@ def p_instruccion_iteracionind(p):
 
 # Instrucción de Iteración Determinada
 class IteracionDet(Instruccion):
-    def __init__(self, guardia, instr, tipo="iteracion determinada"):
-        self.guardia = guardia
+    def __init__(self, arit1, arit2, instr, cont=None,tipo="iteracion determinada"):
+        self.arit1 = arit1
+        self.arit2 = arit2
         self.instr = instr
+        self.cont = cont
         self.tipo = tipo
     
 def p_instruccion_iteraciondet(p):
     '''instruccion :  TkWith TkIdent TkFrom expresion TkTo expresion TkRepeat instruccion TkDone
                     | TkFrom expresion TkTo expresion TkRepeat instruccion TkDone'''
-    p[0] = IteracionDet(p[2], p[4])
+    if len(p) == 10:
+        p[0] = IteracionDet(p[4], p[6], p[8], p[2])
+    else:
+        p[0] = IteracionDet(p[2], p[4], p[6])
 
 # Instrucción de Entrada
 class Entrada(Instruccion):
@@ -227,9 +232,6 @@ def p_expresion_numero(p):
     'expresion : TkNumLit'
     p[0] = Numero(p[1])
 
-def p_expresion_parentizada(p):
-    'expresion : TkParAbre expresion TkParCierra'
-    p[0] = Numero(p[2])
 
 class ExpUnaria(Expr):
     def __init__(self, operador, val, tipo):
@@ -334,6 +336,14 @@ def p_expresion_canvaslit(p):
     'expresion : TkCanvasLit'
     p[0] = Canvas(p[1])
 
+class Parentizada(Expr):
+    def __init__(self, interna, tipo):
+        self.interna = interna
+        self.tipo = tipo
+
+def p_expresion_parentizada(p):
+    'expresion : TkParAbre expresion TkParCierra'
+    p[0] = Parentizada(p[2], "parentizada")
 
 # Funcion local para el número de columnas
 def col_num(input, lexpos):
