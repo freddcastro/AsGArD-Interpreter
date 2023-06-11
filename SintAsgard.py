@@ -71,7 +71,7 @@ class Instruccion():
 
 # Instrucción de Incorporación de Alcance
 class Incorporacion(Instruccion):
-    def __init__(self, declars, instr, tipo="incorporacion"):
+    def __init__(self, declars, instr, tipo="incorporación de alcance"):
         self.declars = declars
         self.instr = instr
         self.tipo = tipo
@@ -357,7 +357,7 @@ def p_error(p):
         if not p:
             print("Error de Sintaxis al final de Archivo")
             return
-        print(f"Error de Sintaxis en línea {p.lineno}, columna {col_num(p.lexer.lexdata, p.lexpos)}")
+        print(f"Error sintáctico en línea {p.lineno}, columna {col_num(p.lexer.lexdata, p.lexpos)}")
         setattr(p_error, "ejecutada", True)
     
 
