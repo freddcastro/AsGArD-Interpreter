@@ -114,7 +114,7 @@ t_TkMayorIgual = r'\>='
 
 t_TkIgual = r'\='
 
-t_TkDesigual = r'\!='
+t_TkDesigual = r'\/='
 
 # Operadores de Canvas
 t_TkConcatHorizontal = r'\:'
@@ -167,4 +167,4 @@ def token_gen(lexer, tokens_salida, errores):
 
 def find_column(input, token):
     comienzo = input.rfind('\n', 0, token.lexpos) + 1
-    return (token.lexpos - comienzo) + 2
+    return (token.lexpos - comienzo) + 1
