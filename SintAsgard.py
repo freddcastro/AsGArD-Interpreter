@@ -257,10 +257,13 @@ def col_num(input, lexpos):
 
 # Manejamos los errores para cada regla TODO mejorar para cada caso, que sea más descriptivo, el num de columna esta mal
 def p_error(p):
-    if not p:
-        print("Error de Sintaxis al final de Archivo")
-        return
-    print(f"Error de Sintaxis en línea {p.lineno}, columna {col_num(p.lexer.lexdata, p.lexpos)}")
+    if not hasattr(p_error, "ejecutada"):
+        if not p:
+            print("Error de Sintaxis al final de Archivo")
+            return
+        print(f"Error de Sintaxis en línea {p.lineno}, columna {col_num(p.lexer.lexdata, p.lexpos)}")
+        setattr(p_error, "ejecutada", True)
+    
 
 # Construimos el parser
 parser = yacc.yacc()
