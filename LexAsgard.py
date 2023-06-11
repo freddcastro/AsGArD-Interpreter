@@ -22,7 +22,9 @@ reserved = {
     "with": "TkWith",
     "integer": "TkInteger",
     "boolean": "TkBoolean",
-    "canvas": "TkCanvas"
+    "canvas": "TkCanvas",
+    "true": "TkTrue",
+    "false": "TkFalse"
 }
 
 tokens = (
@@ -45,7 +47,7 @@ tokens = (
     "TkAsignacion",
     
     # Identificadores
-    "TkIdent", "TkNumLit", "TkTrue", "TkFalse", "TkCanvasLit",
+    "TkIdent", "TkNumLit", "TkCanvasLit",
     
 )
 
