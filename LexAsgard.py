@@ -20,6 +20,9 @@ reserved = {
     "while": "TkWhile",
     "read": "TkRead",
     "with": "TkWith",
+    "integer": "TkInteger",
+    "boolean": "TkBoolean",
+    "canvas": "TkCanvas"
 }
 
 tokens = (
