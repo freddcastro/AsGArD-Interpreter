@@ -255,12 +255,110 @@ def col_num(input, lexpos):
     comienzo = input.rfind('\n', 0, lexpos) + 1
     return (lexpos - comienzo) + 2
 
-# Manejamos los errores para cada regla TODO mejorar para cada caso, que sea más descriptivo, el num de columna esta mal
+# Manejamos los errores para cada regla TODO mejorar para cada caso, que sea más descriptivo.
 def p_instruccion_asignacion_error(p):
     'instruccion : TkIdent TkAsignacion error'
     
     print(f"Asignación Errónea en línea {p.lineno(3)}, columna {col_num(p.lexer.lexdata, p.lexpos(3))}")
 
+def p_instruccion_condicional_error(p):
+    '''instruccion : TkIf error TkThen instruccion TkDone
+                    | TkIf error TkThen instruccion TkOtherwise instruccion TkDone'''
+    
+    print(f"Error de condicional en la linea {p.lineno(2)}, columna {col_num(p.lexdata, p.lexpos(2))}")
+
+def p_instruccion_iteracionind_error(p):
+    '''instruccion : TkWhile error TkRepeat instruccion TkDone'''
+    print(f"Error de iteracion en la linea {p.lineno(2)}, columna {col_num(p.lexdata, p.lexpos(2))}")
+
+def p_instruccion_iteraciondet_error(p):
+    '''instruccion :  TkWith TkIdent TkFrom error TkTo expresion TkRepeat instruccion TkDone
+                    | TkFrom expresion TkTo error TkRepeat instruccion TkDone'''
+
+    print(f"Error de iteracion en la linea {p.lineno(4)}, columna {col_num(p.lexdata, p.lexpos(4))}")
+
+ '''instruccion :  TkWith TkIdent TkFrom expresion TkTo error TkRepeat instruccion TkDone
+                    | TkFrom expresion TkTo expresion TkRepeat instruccion TkDone'''
+
+    print(f"Error de iteracion en la linea {p.lineno(6)}, columna {col_num(p.lexdata, p.lexpos(6))}")
+
+     '''instruccion :  TkWith TkIdent TkFrom expresion TkTo expresion TkRepeat instruccion TkDone
+                    | TkFrom error TkTo expresion TkRepeat instruccion TkDone'''
+
+    print(f"Error de iteracion en la linea {p.lineno(2)}, columna {col_num(p.lexdata, p.lexpos(2))}")
+
+def p_instruccion_salida_error(p):
+    '''instruccion : TkPrint error'''
+    print(f"Error en la expresion de salida, linea {p.lineno(2)}, columna {col_num(p.lexdata, p.lexpos(2))}")    
+
+def p_expresion_OpBinAritmética_error(p):
+    '''expresion : error TkMas expresion
+                  | error TkMenos expresion
+                  | error TkMult expresion
+                  | error TkDiv expresion
+                  | error TkMod expresion'''
+     print(f"Error Aritmetico en la linea {p.lineno(1)}, columna {col_num(p.lexdata, p.lexpos(1))}")        
+
+    '''expresion : expresion TkMas error
+                  | expresion TkMenos error
+                  | expresion TkMult error
+                  | expresion TkDiv error
+                  | expresion TkMod error'''
+    print(f"Error Aritmetico en la linea {p.lineno(3)}, columna {col_num(p.lexdata, p.lexpos(3))}")
+
+def p_expresion_MenosUnit_error(p):
+    'expresion : TkMenos error %prec MenosUnit'
+    print(f"Error de expresion en la linea {p.lineno(2)}, columna {col_num(p.lexdata, p.lexpos(2))}")
+
+def p_expresion_OpBinRelacional_error(p):
+    '''expresion : error TkMenor expresion
+                  | error TkMenorIgual expresion
+                  | error TkMayor expresion
+                  | error TkMayorIgual expresion
+                  | error TkIgual expresion
+                  | error TkDesigual expresion'''
+    print(f"Error de expresion en la linea {p.lineno(1)}, columna {col_num(p.lexdata, p.lexpos(1))}")
+
+    '''expresion : expresion TkMenor error
+                  | expresion TkMenorIgual error
+                  | expresion TkMayor error
+                  | expresion TkMayorIgual error
+                  | expresion TkIgual error
+                  | expresion TkDesigual error'''
+    print(f"Error de expresion en la linea {p.lineno(3)}, columna {col_num(p.lexdata, p.lexpos(3))}")
+
+def p_expresion_OpBinLogica_error(p):
+    '''expresion : error TkConjuncion expresion
+                  | error TkDisjuncion expresion'''
+     print(f"Error de expresion logica en la linea {p.lineno(1)}, columna {col_num(p.lexdata, p.lexpos(1))}")
+
+    '''expresion : expresion TkConjuncion error
+                  | expresion TkDisjuncion error'''
+     print(f"Error de expresion logica en la linea {p.lineno(3)}, columna {col_num(p.lexdata, p.lexpos(3))}")
+
+def p_expresion_Negación_error(p):
+    'expresion : error TkNegacion %prec Negacion'
+    print(f"Error de expresion logica en la linea {p.lineno(1)}, columna {col_num(p.lexdata, p.lexpos(1))}")
+
+def p_expresion_OpBinLienzo_error(p):
+    ''' expresion : error TkConcatHorizontal expresion
+                  | error TkConcatVertical expresion
+                  '''
+    print(f"Error de Lienzo en la linea {p.lineno(1)}, columna {col_num(p.lexdata, p.lexpos(1))}")    
+
+    ''' expresion : expresion TkConcatHorizontal error
+                  | expresion TkConcatVertical error
+                  '''
+    print(f"Error de Lienzo en la linea {p.lineno(3)}, columna {col_num(p.lexdata, p.lexpos(3))}") 
+
+def p_expresion_lienzo_unaria_error(p):
+    '''expresion : TkRotacion error
+                  | expresion TkTransposicion'''
+    print(f"Error de Lienzo en la linea {p.lineno(2)}, columna {col_num(p.lexdata, p.lexpos(2))}")
+
+    '''expresion : TkRotacion expresion
+                  | error TkTransposicion'''
+    print(f"Error de Lienzo en la linea {p.lineno(1)}, columna {col_num(p.lexdata, p.lexpos(1))}")
 # Construimos el parser
 parser = yacc.yacc()
 
