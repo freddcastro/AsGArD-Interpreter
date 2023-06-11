@@ -251,7 +251,7 @@ class OpBinAritmetica(OperacionBinaria):
     def __init__(self, izq, operador, der, tipo="aritmética"):
         super().__init__(izq, operador, der, tipo)
 
-def p_expresion_OpBinAritmética(p):
+def p_expresion_OpBinAritmetica(p):
     '''expresion : expresion TkMas expresion
                   | expresion TkMenos expresion
                   | expresion TkMult expresion
