@@ -271,10 +271,6 @@ def p_expresion_MenosUnit(p):
     'expresion : TkMenos expresion %prec MenosUnit'
     p[0] = ExpUnaria(p[1], p[2], "aritmética")
 
-def p_expresion_truefalse(p):
-    '''expresion : TkTrue 
-                | TkFalse'''
-    p[0] = ExpUnaria(None, p[1], "booleana")
 
 # Operaciones Binarias Relacionales
 class OpBinRelacional(OperacionBinaria):
@@ -310,8 +306,12 @@ class Booleano(Expr):
 # Operación Unaria Lógica - Negación
 def p_expresion_Negacion(p):
     'expresion : expresion TkNegacion %prec Negacion'
-    p[0] = Booleano(p[1], True)
+    p[0] = ExpUnaria(p[2], p[1], 'booleana')
 
+def p_expresion_truefalse(p):
+    '''expresion : TkTrue 
+                | TkFalse'''
+    p[0] = Booleano(p[1], False)
 
 # Operaciones Binarias de Lienzo
 class OpBinLienzo(OperacionBinaria):
@@ -322,12 +322,14 @@ def p_expresion_OpBinLienzo(p):
     ''' expresion : expresion TkConcatHorizontal expresion
                   | expresion TkConcatVertical expresion
                   '''
+    
     p[0] = OpBinLienzo(p[1], p[2], p[3])
+    
 
 def p_expresion_lienzo_unaria(p):
     '''expresion : TkRotacion expresion
                   | expresion TkTransposicion'''
-    if p[1] == "TkRotacion":
+    if p[1] == "$":
         p[0] = ExpUnaria(p[1], p[2], 'lienzo')
     else:
         p[0] = ExpUnaria(p[2], p[1], 'lienzo')
