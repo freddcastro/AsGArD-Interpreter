@@ -55,10 +55,10 @@ precedence = (
     ('nonassoc', 'TkMayor', 'TkMenor', 'TkMayorIgual',
      'TkMenorIgual', 'TkIgual', 'TkDesigual', 'TkAsignacion'), # Operadores No Asociativos
     ('left', 'TkMas', 'TkMenos', 'TkDisjuncion', 'TkConcatHorizontal',
-     'TkConcatVertical'),
-    ('left', 'TkMult', 'TkDiv', 'TkMod', 'TkConjuncion', 'TkRotacion', 'Negacion'), # Token Temporal Negacion
-    ('right', 'MenosUnit', 'TkTransposicion'), # Token temporal MenosUnit
-    ('left', 'TkParAbre', 'TkParCierra')
+     'TkConcatVertical',),
+    ('left', 'TkMult', 'TkDiv', 'TkMod', 'TkConjuncion', 'TkRotacion', 'Negacion','TkPuntoYComa'), # Token Temporal Negacion
+    ('right', 'MenosUnit', 'TkTransposicion',), # Token temporal MenosUnit
+    ('left', 'TkParAbre', 'TkParCierra', )
 )
 
 ### INSTRUCCIONES ###
@@ -132,15 +132,18 @@ def p_instruccion_asignacion(p):
 
 # Instrucción de Secuenciación
 class Secuenciacion(Instruccion):
-    def __init__(self, ins1, ins2, tipo="secuenciacion"):
+    def __init__(self, ins1, ins2,anidada, tipo="secuenciacion"):
         self.ins1 = ins1
         self.ins2 = ins2
+        self.anidada = anidada
         self.tipo = tipo
 
 def p_instruccion_secuenciacion(p):
     '''instruccion : instruccion TkPuntoYComa instruccion'''
-    p[0] = Secuenciacion(p[1], p[3])
-
+    if isinstance(p[1], Secuenciacion):
+        p[0] = Secuenciacion(p[1], p[3], True)
+    else:
+        p[0] = Secuenciacion(p[1], p[3], False)
 
 # Instrucción Condicional
 class Condicional(Instruccion):

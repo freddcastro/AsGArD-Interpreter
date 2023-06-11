@@ -45,7 +45,7 @@ tokens = (
     "TkAsignacion",
     
     # Identificadores
-    "TkIdent", "TkNumLit", "TkTrue", "TkFalse", "TkCanvasLit", "Comentario",
+    "TkIdent", "TkNumLit", "TkTrue", "TkFalse", "TkCanvasLit",
     
 )
 
