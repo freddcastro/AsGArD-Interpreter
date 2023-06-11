@@ -29,6 +29,25 @@ expresion ->  expresion TkMas expresion
             | TkCanvasLit
             | TkIdent
             | TkParAbre expresion TkParCierra
+
+instruccion -> TkUsing declaracion TkBegin instruccion TkEnd
+             | TkIdent TkAsignacion expresion
+             | instruccion TkPuntoYComa instruccion
+             | TkIf expresion TkThen instruccion TkDone
+             | TkIf expresion TkThen instruccion TkOtherwise instruccion TkDone
+             | TkWhile expresion TkRepeat instruccion TkDone
+             | TkWith TkIdent TkFrom expresion TkTo expresion TkRepeat instruccion TkDone
+             | TkFrom expresion TkTo expresion TkRepeat instruccion TkDone
+             | TkPrint expresion
+             | TkRead TkIdent
+
+identificadores -> TkIdent
+                 | TkIdent TkComa identificadores
+
+declaracion -> identificadores TkOf TkType TkInteger
+             | identificadores TkOf TkType TkBoolean
+             | identificadores TkOf TkType TkCanvas
+             | declaracion TkPuntoYComa declaracion
 '''
 
 # Establecemos la precedencia de las operaciones
@@ -164,9 +183,6 @@ def p_instruccion_iteraciondet(p):
                     | TkFrom expresion TkTo expresion TkRepeat instruccion TkDone'''
     p[0] = IteracionDet(p[2], p[4])
 
-
-# Instrucción de Incorporación de Alcance TODO
-
 # Instrucción de Entrada
 class Entrada(Instruccion):
     def __init__(self, var, tipo="entrada"):
@@ -210,6 +226,10 @@ class Numero(Expr):
 def p_expresion_numero(p):
     'expresion : TkNumLit'
     p[0] = Numero(p[1])
+
+def p_expresion_parentizada(p):
+    'expresion : TkParAbre expresion TkParCierra'
+    p[0] = Numero(p[2])
 
 class ExpUnaria(Expr):
     def __init__(self, operador, val, tipo):
@@ -276,10 +296,15 @@ def p_expresion_OpBinLogica(p):
                   | expresion TkDisjuncion expresion'''
     p[0] = OpBinLogica(p[1],p[2],p[3])
 
+class Booleano(Expr):
+    def __init__(self, valor, negada):
+        self.valor = valor
+        self.negada = negada
+
 # Operación Unaria Lógica - Negación
 def p_expresion_Negación(p):
     'expresion : expresion TkNegacion %prec Negacion'
-    p[0] = ExpUnaria(p[2], p[1], "lógica")
+    p[0] = Booleano(p[1], True)
 
 
 # Operaciones Binarias de Lienzo
@@ -301,9 +326,13 @@ def p_expresion_lienzo_unaria(p):
     else:
         p[0] = ExpUnaria(p[2], p[1], 'lienzo')
 
+class Canvas(Expr):
+    def __init__(self, valor):
+        self.valor = valor
+
 def p_expresion_canvaslit(p):
     'expresion : TkCanvasLit'
-    p[0] = ExpUnaria(None, p[1], 'lienzo')
+    p[0] = Canvas(p[1])
 
 
 # Funcion local para el número de columnas
