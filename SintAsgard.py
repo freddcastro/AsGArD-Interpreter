@@ -302,7 +302,7 @@ class Booleano(Expr):
         self.negada = negada
 
 # Operación Unaria Lógica - Negación
-def p_expresion_Negación(p):
+def p_expresion_Negacion(p):
     'expresion : expresion TkNegacion %prec Negacion'
     p[0] = Booleano(p[1], True)
 
