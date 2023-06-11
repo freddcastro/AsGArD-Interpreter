@@ -49,6 +49,56 @@ class Instruccion():
     def __init__(self, tipo):
         self.tipo = tipo
 
+
+# Instrucción de Incorporación de Alcance
+class Incorporacion(Instruccion):
+    def __init__(self, declars, instr, tipo="incorporacion"):
+        self.declars = declars
+        self.instr = instr
+        self.tipo = tipo
+
+def p_instruccion_incorporacion(p):
+    'instruccion : TkUsing declaracion TkBegin instruccion TkEnd'
+    p[0] = Incorporacion(p[2], p[4])
+
+
+
+# Lista de Declaraciones (no es precisamente una instrucción pero se considerará como tal a fines del código)
+
+class ListaDeclaraciones(Instruccion):
+    def __init__(self, vars, tipo_declar, tipo="listadeclaraciones"):
+        self.vars = vars
+        self.tipo_declar = tipo_declar
+        self.tipo = tipo
+
+# Definimos una lista que almacenará los identificadores encontrados
+identificadores = []
+
+def p_instruccion_declaraciones(p):
+    '''declaracion : identificadores TkOf TkType TkInteger
+                    | identificadores TkOf TkType TkBoolean
+                    | identificadores TkOf TkType TkCanvas
+                    | declaracion TkPuntoYComa declaracion'''
+    if len(p) == 5:
+        # Copiamos la lista de identificadores actual
+        identificadores2 = identificadores.copy()
+
+        # Creamos la clase
+        p[0] = ListaDeclaraciones(identificadores2, p[4])
+
+        # Reiniciamos la global para recibir los nuevos identificadores
+        identificadores.clear()
+    if len(p) == 4:
+        p[0] = ListaDeclaraciones([p[1], p[3]], "compuesto")
+
+
+
+def p_instruccion_identificadores(p):
+    '''identificadores : TkIdent
+                        | TkIdent TkComa identificadores'''
+    if len(p) >= 2:
+        identificadores.append(p[1])
+
 # Instrucción de Asignación
 class Asignacion(Instruccion):
     def __init__(self, var, val):
@@ -66,6 +116,7 @@ class Secuenciacion(Instruccion):
     def __init__(self, ins1, ins2, tipo="secuenciacion"):
         self.ins1 = ins1
         self.ins2 = ins2
+        self.tipo = tipo
 
 def p_instruccion_secuenciacion(p):
     '''instruccion : instruccion TkPuntoYComa instruccion'''
@@ -78,6 +129,7 @@ class Condicional(Instruccion):
         self.guardia = guardia
         self.exito = exito
         self.fracaso = fracaso
+        self.tipo = tipo
     
 def p_instruccion_condicional(p):
     '''instruccion : TkIf expresion TkThen instruccion TkDone
@@ -93,6 +145,7 @@ class IteracionInd(Instruccion):
     def __init__(self, guardia, instr, tipo="iteracion indeterminada"):
         self.guardia = guardia
         self.instr = instr
+        self.tipo = tipo
     
 def p_instruccion_iteracionind(p):
     '''instruccion : TkWhile expresion TkRepeat instruccion TkDone'''
@@ -104,6 +157,7 @@ class IteracionDet(Instruccion):
     def __init__(self, guardia, instr, tipo="iteracion determinada"):
         self.guardia = guardia
         self.instr = instr
+        self.tipo = tipo
     
 def p_instruccion_iteraciondet(p):
     '''instruccion :  TkWith TkIdent TkFrom expresion TkTo expresion TkRepeat instruccion TkDone
@@ -117,6 +171,7 @@ def p_instruccion_iteraciondet(p):
 class Entrada(Instruccion):
     def __init__(self, var, tipo="entrada"):
         self.var = var
+        self.tipo = tipo
 
 def p_instruccion_entrada(p):
     '''instruccion : TkRead TkIdent'''
@@ -127,6 +182,7 @@ def p_instruccion_entrada(p):
 class Salida(Instruccion):
     def __init__(self, expr, tipo="salida"):
         self.expr = expr
+        self.tipo = tipo
 
 def p_instruccion_salida(p):
     '''instruccion : TkPrint expresion'''
