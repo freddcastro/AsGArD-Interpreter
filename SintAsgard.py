@@ -132,18 +132,19 @@ def p_instruccion_asignacion(p):
 
 # Instrucción de Secuenciación
 class Secuenciacion(Instruccion):
-    def __init__(self, ins1, ins2,anidada, tipo="secuenciacion"):
+    def __init__(self, ins1, ins2,anidada, primer_print, tipo="secuenciacion"):
         self.ins1 = ins1
         self.ins2 = ins2
         self.anidada = anidada
+        self.primer_print = primer_print
         self.tipo = tipo
 
 def p_instruccion_secuenciacion(p):
     '''instruccion : instruccion TkPuntoYComa instruccion'''
     if isinstance(p[1], Secuenciacion):
-        p[0] = Secuenciacion(p[1], p[3], True)
+        p[0] = Secuenciacion(p[1], p[3], True, False)
     else:
-        p[0] = Secuenciacion(p[1], p[3], False)
+        p[0] = Secuenciacion(p[1], p[3], False, True)
 
 # Instrucción Condicional
 class Condicional(Instruccion):
