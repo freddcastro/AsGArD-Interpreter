@@ -255,7 +255,8 @@ def col_num(input, lexpos):
     comienzo = input.rfind('\n', 0, lexpos) + 1
     return (lexpos - comienzo) + 1
 
-# Manejamos los errores para cada regla TODO mejorar para cada caso, que sea más descriptivo, el num de columna esta mal
+# Manejamos los errores de forma general, permitiendo que la ejecución
+# sea solamente una vez
 def p_error(p):
     if not hasattr(p_error, "ejecutada"):
         if not p:
