@@ -451,6 +451,7 @@ class Parentizada(Expr):
     def __init__(self, interna, tipo):
         self.interna = interna
         self.tipo = tipo
+        self.var_tipo = interna.var_tipo
 
 def p_expresion_parentizada(p):
     'expresion : TkParAbre expresion TkParCierra'
