@@ -54,11 +54,14 @@ declaracion -> identificadores TkOf TkType TkInteger
 precedence = (
     ('nonassoc', 'TkMayor', 'TkMenor', 'TkMayorIgual',
      'TkMenorIgual', 'TkIgual', 'TkDesigual', 'TkAsignacion'), # Operadores No Asociativos
-    ('left', 'TkMas', 'TkMenos', 'TkDisjuncion', 'TkConcatHorizontal',
-     'TkConcatVertical',),
-    ('left', 'TkMult', 'TkDiv', 'TkMod', 'TkConjuncion', 'TkRotacion', 'Negacion','TkPuntoYComa'), # Token Temporal Negacion
+    
+    ('left', 'TkMas', 'TkMenos', 'TkDisjuncion', 'TkConcatHorizontal','TkConcatVertical',) ,
+    
+    ('left', 'TkMult', 'TkDiv', 'TkMod', 'TkConjuncion', 'TkRotacion', 'TkPuntoYComa'), 
+
     ('right', 'MenosUnit', 'TkTransposicion',), # Token temporal MenosUnit
-    ('left', 'TkParAbre', 'TkParCierra', )
+    
+    ('left', 'TkParAbre', 'TkParCierra', 'TkNegacion') # Token Temporal Negacion
 )
 
 ### Analisis de Contexto ###
@@ -362,7 +365,7 @@ def p_expresion_OpBinAritmetica(p):
                   | expresion TkDiv expresion
                   | expresion TkMod expresion'''
 
-    # Verificamos si alguna expresión es una variable
+    # Verificamos si alguna expresión es una variable y aplicamos el manejo correspondiente
     existencia_variables(p[1], p.lineno(2))
     
     existencia_variables(p[3], p.lineno(2))
@@ -373,9 +376,9 @@ def p_expresion_OpBinAritmetica(p):
 def p_expresion_MenosUnit(p):
     'expresion : TkMenos expresion %prec MenosUnit'
 
-    # Para una expresión unaria aritmética, si se trata de una variable, verificamos
+    # Para una expresión unaria, si se trata de una variable, verificamos
     # existencia y luego le asociamos a la variable su tipo de la tabla
-    existe = existencia_variables(p[2], p.lineno(1))
+    existencia_variables(p[2], p.lineno(1))
     if p[2].var_tipo != "integer":
         p[0] = ExpUnaria(p[1], p[2], "aritmética")
         p[0].var_tipo = "error"
@@ -423,9 +426,16 @@ class Booleano(Expr):
 
 # Operación Unaria Lógica - Negación
 def p_expresion_Negacion(p):
-    'expresion : expresion TkNegacion %prec Negacion'
-    p[0] = ExpUnaria(p[2], p[1], 'booleana')
+    'expresion : expresion TkNegacion'
 
+    existencia_variables(p[1], p.lineno(2))
+    if p[1].var_tipo != "boolean":
+        p[0] = ExpUnaria(p[2], p[1], 'booleana')
+        p[0].var_tipo = "error"
+    else:
+        p[0] = ExpUnaria(p[2], p[1], 'booleana')
+        p[0].var_tipo = "boolean"
+        
 def p_expresion_truefalse(p):
     '''expresion : TkTrue 
                 | TkFalse'''
