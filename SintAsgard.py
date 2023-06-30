@@ -390,6 +390,7 @@ def p_expresion_MenosUnit(p):
 class OpBinRelacional(OperacionBinaria):
     def __init__(self, izq, operador, der, tipo="relacional"):
         super().__init__(izq, operador, der, tipo)
+        self.var_tipo = "boolean" if self.izq.var_tipo == self.der.var_tipo else "error"
 
 def p_expresion_OpBinRelacional(p):
     '''expresion : expresion TkMenor expresion
@@ -398,6 +399,9 @@ def p_expresion_OpBinRelacional(p):
                   | expresion TkMayorIgual expresion
                   | expresion TkIgual expresion
                   | expresion TkDesigual expresion'''
+    existencia_variables(p[1], p.lineno(2))
+    
+    existencia_variables(p[3], p.lineno(2))
 
     p[0] = OpBinRelacional(p[1],p[2],p[3])
 
@@ -428,6 +432,7 @@ class Booleano(Expr):
 def p_expresion_Negacion(p):
     'expresion : expresion TkNegacion'
 
+    # Misma lógica que con las unarias aritméticas
     existencia_variables(p[1], p.lineno(2))
     if p[1].var_tipo != "boolean":
         p[0] = ExpUnaria(p[2], p[1], 'booleana')
