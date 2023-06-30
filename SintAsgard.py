@@ -80,6 +80,7 @@ class TablaDeSimbolos():
         else:
             print(f'Error Estático: La variable {identificador} ya está definida')
     
+    # Verifica la existencia de la variable en cada incorporación de alcance correspondiente
     def verificarExistencia(self, identificador, existe=False):
 
         for key in self.tabla.keys():
@@ -96,7 +97,15 @@ class TablaDeSimbolos():
 
         return existe            
 
+    def verificarTipo(self, tipo_esperado, valor):
 
+        # Verificamos si el error está en la expresión
+        if valor.var_tipo == "error":
+            return "error"
+
+        if tipo_esperado != valor.var_tipo:
+            return False
+        return True
 # Creamos la variable t_actual que indica cuál es la tabla de símbolos actual
 t_actual = TablaDeSimbolos({}, None)
 
@@ -183,7 +192,6 @@ class Asignacion(Instruccion):
         self.var = var
         self.val = val
         self.tipo = "asignacion"
-        self.var_tipo = None
 
 def p_instruccion_asignacion(p):
     'instruccion : TkIdent TkAsignacion expresion'
@@ -194,10 +202,16 @@ def p_instruccion_asignacion(p):
     existe = t_actual.verificarExistencia(p[1])
     if not existe:
         print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no está definida")
+    else:
+        # Si todo está correcto, solamente basta verificar el tipo de variable esperado
+        tipo_correcto = t_actual.verificarTipo(t_actual.tabla[f"{p[1]}"][1], p[3])
 
+        # Si la función de verificación devuelve error, entonces el error está en la expresión generada
+        if tipo_correcto == "error":
+            print(f"Error Estático en la línea {p.lineno(1)}, columna {col_num(p.lexer.lexdata, p.lexpos(2)+2)}: Conlficto de tipos en la expresión")
 
-    # Si todo está correcto, solamente basta verificar el tipo de variable esperado
-
+        elif tipo_correcto is False:
+            print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no tiene el tipo de variable correcto")
 
 # Instrucción de Secuenciación
 class Secuenciacion(Instruccion):
@@ -300,7 +314,7 @@ def p_expresion_variable(p):
 class Numero(Expr):
     def __init__(self,valor):
         self.valor = valor
-        self.tipo = "int"
+        self.var_tipo = "integer"
 
 def p_expresion_numero(p):
     'expresion : TkNumLit'
@@ -326,6 +340,7 @@ class OperacionBinaria(Expr):
 class OpBinAritmetica(OperacionBinaria):
     def __init__(self, izq, operador, der, tipo="aritmética"):
         super().__init__(izq, operador, der, tipo)
+        self.var_tipo = "integer" if self.izq.var_tipo == "integer" and self.der.var_tipo == "integer" else "error"
 
 def p_expresion_OpBinAritmetica(p):
     '''expresion : expresion TkMas expresion
@@ -372,7 +387,7 @@ class Booleano(Expr):
     def __init__(self, valor, negada):
         self.valor = valor
         self.negada = negada
-        self.tipo = "bool"
+        self.var_tipo = "boolean"
 
 # Operación Unaria Lógica - Negación
 def p_expresion_Negacion(p):
@@ -408,7 +423,7 @@ def p_expresion_lienzo_unaria(p):
 class Canvas(Expr):
     def __init__(self, valor):
         self.valor = valor
-        self.tipo = "canvas"
+        self.var_tipo = "canvas"
 
 def p_expresion_canvaslit(p):
     'expresion : TkCanvasLit'
