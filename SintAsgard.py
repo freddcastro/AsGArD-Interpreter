@@ -254,6 +254,10 @@ class Condicional(Instruccion):
 def p_instruccion_condicional(p):
     '''instruccion : TkIf expresion TkThen instruccion TkDone
                     | TkIf expresion TkThen instruccion TkOtherwise instruccion TkDone'''
+    # Verificamos si la expresión dada es una variable existente
+    existencia_variables(p[2], p.lineno(1))
+    if p[2].var_tipo != "boolean":
+        print(f"Error Estático en la línea {p.lineno(1)}: La expresión en la guardia del condicional no tiene el tipo de dato booleano")
     if len(p) == 6:
         p[0] = Condicional(p[2], p[4])
     else:
