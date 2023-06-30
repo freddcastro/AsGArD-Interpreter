@@ -399,6 +399,8 @@ def p_expresion_OpBinRelacional(p):
                   | expresion TkMayorIgual expresion
                   | expresion TkIgual expresion
                   | expresion TkDesigual expresion'''
+    
+    # Misma lógica que con expresiones binarias aritméticas
     existencia_variables(p[1], p.lineno(2))
     
     existencia_variables(p[3], p.lineno(2))
@@ -450,22 +452,43 @@ def p_expresion_truefalse(p):
 class OpBinLienzo(OperacionBinaria):
     def __init__(self, izq, operador, der, tipo="lienzo"):
         super().__init__(izq, operador, der, tipo)
+        self.var_tipo = "canvas" if self.izq.var_tipo == "canvas" and self.der.var_tipo == "canvas" else "error"
 
 def p_expresion_OpBinLienzo(p):
     ''' expresion : expresion TkConcatHorizontal expresion
                   | expresion TkConcatVertical expresion
                   '''
     
+    # Misma lógica que en expresiones binarias aritméticas
+    existencia_variables(p[1], p.lineno(2))
+    
+    existencia_variables(p[3], p.lineno(2))
+
     p[0] = OpBinLienzo(p[1], p[2], p[3])
     
 
 def p_expresion_lienzo_unaria(p):
     '''expresion : TkRotacion expresion
                   | expresion TkTransposicion'''
+    
+    # Misma lógica que con las unarias aritméticas
     if p[1] == "$":
-        p[0] = ExpUnaria(p[1], p[2], 'lienzo')
+        existencia_variables(p[2], p.lineno(1))
+        if p[2].var_tipo != "canvas":
+            p[0] = ExpUnaria(p[1], p[2], 'lienzo')
+            p[0].var_tipo = "error"
+        else:
+            p[0] = ExpUnaria(p[1], p[2], 'lienzo')
+            p[0].var_tipo = "canvas"
     else:
-        p[0] = ExpUnaria(p[2], p[1], 'lienzo')
+        existencia_variables(p[1], p.lineno(2))
+        if p[1].var_tipo != "canvas":
+            p[0] = ExpUnaria(p[2], p[1], 'lienzo')
+            p[0].var_tipo = "error"
+        else:
+            p[0] = ExpUnaria(p[2], p[1], 'lienzo')
+            p[0].var_tipo = "canvas"
+        
 
 class Canvas(Expr):
     def __init__(self, valor):
