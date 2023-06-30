@@ -109,10 +109,17 @@ class TablaDeSimbolos():
 # Creamos la variable t_actual que indica cuál es la tabla de símbolos actual
 t_actual = TablaDeSimbolos({}, None)
 
+# Con esta función, manejamos las variables para cada expresión e instrucción, donde verificamos
+# si existen y, de ser así, les añadimos el valor especificado en la tabla de símbolos
+def manejo_variables(inst, linea):
+    if isinstance(inst, Variable):
+        if t_actual.verificarExistencia(inst.ident):
+            inst.var_tipo = t_actual.tabla[f"{inst.ident}"][1]
+        else:
+            print(f"Error Estático en la línea {linea}: La variable '{inst.ident}' no está definida")
+
 
 ### INSTRUCCIONES ###
-
-
 class Instruccion():
     def __init__(self, tipo):
         self.tipo = tipo
@@ -329,6 +336,7 @@ class ExpUnaria(Expr):
         self.operador = operador
         self.val = val
         self.tipo = tipo
+        self.var_tipo = self.val.var_tipo
 
 class OperacionBinaria(Expr):
     def __init__(self, izq, operador, der, tipo):
@@ -352,26 +360,27 @@ def p_expresion_OpBinAritmetica(p):
                   | expresion TkDiv expresion
                   | expresion TkMod expresion'''
 
-    # Si alguna de las dos partes de la expresión es una variable, debemos verificar existencia y de estar declarada buscamos su tipo y se lo asignamos
-
-    # De no existir, debemos imprimir un error de no existencia
-    if isinstance(p[1], Variable):
-        if t_actual.verificarExistencia(p[1].ident):
-            p[1].var_tipo = t_actual.tabla[f"{p[1].ident}"][1]
-        else:
-            print(f"Error Estático en la línea {p.lineno(2)}: La variable '{p[1].ident}' no está definida")
+    # Verificamos si alguna expresión es una variable
+    manejo_variables(p[1], p.lineno(2))
     
-    if isinstance(p[3], Variable):
-        if t_actual.verificarExistencia(p[3].ident):
-            p[3].var_tipo = t_actual.tabla[f"{p[3].ident}"][1]
-        else:
-            print(f"Error Estático en la línea {p.lineno(2)}: La variable '{p[3].ident}' no está definida")
+    manejo_variables(p[3], p.lineno(2))
 
     p[0] = OpBinAritmetica(p[1],p[2],p[3])
 
 # Operación Unaria Aritmética - Menos
 def p_expresion_MenosUnit(p):
     'expresion : TkMenos expresion %prec MenosUnit'
+
+    # Para una expresión unaria aritmética, si se trata de una variable, verificamos
+    # existencia y luego le asociamos a la variable su tipo de la tabla
+    if isinstance(p[2], Variable):
+        print("ola")
+        if t_actual.verificarExistencia(p[2].ident):
+            print("alo1")
+            p[2].var_tipo = t_actual.tabla[f"{p[2].ident}"][1]
+        else:
+            print("alo2")
+            print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[2].ident}' no está definida")
     p[0] = ExpUnaria(p[1], p[2], "aritmética")
 
 
@@ -455,6 +464,9 @@ class Parentizada(Expr):
 
 def p_expresion_parentizada(p):
     'expresion : TkParAbre expresion TkParCierra'
+
+    # verificamos si es una variable y realizamos el proceso correspondiente
+    manejo_variables(p[2], p.lineno(1))
     p[0] = Parentizada(p[2], "parentizada")
 
 # Funcion local para el número de columnas
