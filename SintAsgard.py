@@ -61,6 +61,46 @@ precedence = (
     ('left', 'TkParAbre', 'TkParCierra', )
 )
 
+### Analisis de Contexto ###
+# Definimos la clase correspondiente a la tabla de símbolos
+class TablaDeSimbolos():
+    def __init__(self, tabla, padre):
+        self.tabla = tabla
+        self.padre = padre
+    
+    # Agrega elementos a la tabla actual
+    def insertar(self, identificador, tipo, valor=None):
+        # Primero, debemos chequear que al insertar, no exista un identificador con el mismo nombre
+        unique = True
+        for key in self.tabla.keys():
+            if key == identificador:
+                unique = False
+        if unique:
+            self.tabla.update({f"{identificador}": [identificador, tipo, valor]})
+        else:
+            print(f'Error Estático: La variable {identificador} ya está definida')
+    
+    def verificarExistencia(self, identificador, existe=False):
+
+        for key in self.tabla.keys():
+            if key == identificador:
+                existe = True
+                return existe
+        if not existe:
+            if self.padre is None:
+                existe = False
+                return existe
+            else:
+                existe = self.padre.verificarExistencia(identificador, existe)
+                return existe
+
+        return existe            
+
+
+# Creamos la variable t_actual que indica cuál es la tabla de símbolos actual
+t_actual = TablaDeSimbolos({}, None)
+
+
 ### INSTRUCCIONES ###
 
 
@@ -77,11 +117,22 @@ class Incorporacion(Instruccion):
         self.tipo = tipo
 
 def p_instruccion_incorporacion(p):
-    'instruccion : TkUsing declaracion TkBegin instruccion TkEnd'
-    p[0] = Incorporacion(p[2], p[4])
+    'instruccion : abrir_alcance TkUsing declaracion TkBegin instruccion TkEnd cerrar_alcance'
+    p[0] = Incorporacion(p[3], p[5])
+    
+def p_abrir_alcance(p):
+    "abrir_alcance :"
+    global t_actual
+    p[0] = TablaDeSimbolos({}, t_actual)
+    # le asignamos este valor a la variable global t_actual
+    t_actual = p[0]
 
 
-
+def p_cerrar_alcance(p):
+    "cerrar_alcance :"
+    global t_actual
+    t_actual = t_actual.padre
+    
 # Lista de Declaraciones (no es precisamente una instrucción pero se considerará como tal a fines del código)
 
 class ListaDeclaraciones(Instruccion):
@@ -89,9 +140,10 @@ class ListaDeclaraciones(Instruccion):
         self.vars = vars
         self.tipo_declar = tipo_declar
         self.tipo = tipo
+        self.tabla = None
 
 # Definimos una lista que almacenará los identificadores encontrados
-identificadores = []
+l_identificadores = []
 
 def p_instruccion_declaraciones(p):
     '''declaracion : identificadores TkOf TkType TkInteger
@@ -100,23 +152,30 @@ def p_instruccion_declaraciones(p):
                     | declaracion TkPuntoYComa declaracion'''
     if len(p) == 5:
         # Copiamos la lista de identificadores actual
-        identificadores2 = identificadores.copy()
+        identificadores2 = l_identificadores.copy()
 
         # Creamos la clase
         p[0] = ListaDeclaraciones(identificadores2, p[4])
 
         # Reiniciamos la global para recibir los nuevos identificadores
-        identificadores.clear()
+        l_identificadores.clear()
     if len(p) == 4:
         p[0] = ListaDeclaraciones([p[1], p[3]], "compuesto")
+    
+    
+    p[0].tabla = t_actual
 
-
+    if p[0].tipo_declar != "compuesto":
+            
+        # Ahora, insertamos elementos en la tabla
+        for var in p[0].vars:
+            p[0].tabla.insertar(var, p[0].tipo_declar)
 
 def p_instruccion_identificadores(p):
     '''identificadores : TkIdent
                         | TkIdent TkComa identificadores'''
     if len(p) >= 2:
-        identificadores.append(p[1])
+        l_identificadores.append(p[1])
 
 # Instrucción de Asignación
 class Asignacion(Instruccion):
@@ -124,10 +183,20 @@ class Asignacion(Instruccion):
         self.var = var
         self.val = val
         self.tipo = "asignacion"
+        self.var_tipo = None
 
 def p_instruccion_asignacion(p):
     'instruccion : TkIdent TkAsignacion expresion'
     p[0] = Asignacion(p[1], p[3])
+
+    # Al momento de revisar la instrucción de asignación, debemos verificar que
+    # la variable a utilizar exista y de no ser así, debe imprimir error
+    existe = t_actual.verificarExistencia(p[1])
+    if not existe:
+        print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no está definida")
+
+
+    # Si todo está correcto, solamente basta verificar el tipo de variable esperado
 
 
 # Instrucción de Secuenciación
@@ -231,6 +300,7 @@ def p_expresion_variable(p):
 class Numero(Expr):
     def __init__(self,valor):
         self.valor = valor
+        self.tipo = "int"
 
 def p_expresion_numero(p):
     'expresion : TkNumLit'
@@ -302,6 +372,7 @@ class Booleano(Expr):
     def __init__(self, valor, negada):
         self.valor = valor
         self.negada = negada
+        self.tipo = "bool"
 
 # Operación Unaria Lógica - Negación
 def p_expresion_Negacion(p):
@@ -311,7 +382,7 @@ def p_expresion_Negacion(p):
 def p_expresion_truefalse(p):
     '''expresion : TkTrue 
                 | TkFalse'''
-    p[0] = Booleano(p[1], False)
+    p[0] = Booleano(p[1], False)    
 
 # Operaciones Binarias de Lienzo
 class OpBinLienzo(OperacionBinaria):
@@ -337,6 +408,7 @@ def p_expresion_lienzo_unaria(p):
 class Canvas(Expr):
     def __init__(self, valor):
         self.valor = valor
+        self.tipo = "canvas"
 
 def p_expresion_canvaslit(p):
     'expresion : TkCanvasLit'
