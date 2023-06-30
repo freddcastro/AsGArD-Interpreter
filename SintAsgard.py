@@ -79,7 +79,7 @@ class TablaDeSimbolos():
             self.tabla.update({f"{identificador}": [identificador, tipo, valor]})
         else:
             print(f'Error Estático: La variable {identificador} ya está definida')
-    
+
     # Verifica la existencia de la variable en cada incorporación de alcance correspondiente
     def verificarExistencia(self, identificador, existe=False):
 
@@ -195,7 +195,6 @@ class Asignacion(Instruccion):
 
 def p_instruccion_asignacion(p):
     'instruccion : TkIdent TkAsignacion expresion'
-    p[0] = Asignacion(p[1], p[3])
 
     # Al momento de revisar la instrucción de asignación, debemos verificar que
     # la variable a utilizar exista y de no ser así, debe imprimir error
@@ -203,15 +202,18 @@ def p_instruccion_asignacion(p):
     if not existe:
         print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no está definida")
     else:
-        # Si todo está correcto, solamente basta verificar el tipo de variable esperado
+        
+        # Ahora, basta verificar el tipo de variable esperado
         tipo_correcto = t_actual.verificarTipo(t_actual.tabla[f"{p[1]}"][1], p[3])
 
         # Si la función de verificación devuelve error, entonces el error está en la expresión generada
         if tipo_correcto == "error":
-            print(f"Error Estático en la línea {p.lineno(1)}, columna {col_num(p.lexer.lexdata, p.lexpos(2)+2)}: Conlficto de tipos en la expresión")
+            print(f"Error Estático en la línea {p.lineno(1)}, columna {col_num(p.lexer.lexdata, p.lexpos(2)+2)}: Conflicto de tipos en la expresión")
 
         elif tipo_correcto is False:
             print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no tiene el tipo de variable correcto")
+
+    p[0] = Asignacion(p[1], p[3])
 
 # Instrucción de Secuenciación
 class Secuenciacion(Instruccion):
@@ -306,6 +308,7 @@ class Expr: pass
 class Variable(Expr):
     def __init__(self, ident):
         self.ident = ident
+        self.var_tipo = None
 
 def p_expresion_variable(p):
     'expresion : TkIdent'
@@ -348,6 +351,21 @@ def p_expresion_OpBinAritmetica(p):
                   | expresion TkMult expresion
                   | expresion TkDiv expresion
                   | expresion TkMod expresion'''
+
+    # Si alguna de las dos partes de la expresión es una variable, debemos verificar existencia y de estar declarada buscamos su tipo y se lo asignamos
+
+    # De no existir, debemos imprimir un error de no existencia
+    if isinstance(p[1], Variable):
+        if t_actual.verificarExistencia(p[1].ident):
+            p[1].var_tipo = t_actual.tabla[f"{p[1].ident}"][1]
+        else:
+            print(f"Error Estático en la línea {p.lineno(2)}: La variable '{p[1].ident}' no está definida")
+    
+    if isinstance(p[3], Variable):
+        if t_actual.verificarExistencia(p[3].ident):
+            p[3].var_tipo = t_actual.tabla[f"{p[3].ident}"][1]
+        else:
+            print(f"Error Estático en la línea {p.lineno(2)}: La variable '{p[3].ident}' no está definida")
 
     p[0] = OpBinAritmetica(p[1],p[2],p[3])
 
