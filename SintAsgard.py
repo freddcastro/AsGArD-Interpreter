@@ -273,6 +273,12 @@ class IteracionInd(Instruccion):
     
 def p_instruccion_iteracionind(p):
     '''instruccion : TkWhile expresion TkRepeat instruccion TkDone'''
+
+    # Verificamos si la expresión dada es una variable existente
+    existencia_variables(p[2], p.lineno(1))
+    if p[2].var_tipo != "boolean":
+        print(f"Error Estático en la línea {p.lineno(1)}: La expresión en la guardia de la iteración indeterminada no tiene el tipo de dato booleano")
+
     p[0] = IteracionInd(p[2], p[4])
 
 
