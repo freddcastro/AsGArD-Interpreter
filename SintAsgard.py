@@ -111,12 +111,14 @@ t_actual = TablaDeSimbolos({}, None)
 
 # Con esta función, manejamos las variables para cada expresión e instrucción, donde verificamos
 # si existen y, de ser así, les añadimos el valor especificado en la tabla de símbolos
-def manejo_variables(inst, linea):
+def existencia_variables(inst, linea):
     if isinstance(inst, Variable):
         if t_actual.verificarExistencia(inst.ident):
             inst.var_tipo = t_actual.tabla[f"{inst.ident}"][1]
+            return  True
         else:
             print(f"Error Estático en la línea {linea}: La variable '{inst.ident}' no está definida")
+            return False
 
 
 ### INSTRUCCIONES ###
@@ -361,9 +363,9 @@ def p_expresion_OpBinAritmetica(p):
                   | expresion TkMod expresion'''
 
     # Verificamos si alguna expresión es una variable
-    manejo_variables(p[1], p.lineno(2))
+    existencia_variables(p[1], p.lineno(2))
     
-    manejo_variables(p[3], p.lineno(2))
+    existencia_variables(p[3], p.lineno(2))
 
     p[0] = OpBinAritmetica(p[1],p[2],p[3])
 
@@ -373,16 +375,18 @@ def p_expresion_MenosUnit(p):
 
     # Para una expresión unaria aritmética, si se trata de una variable, verificamos
     # existencia y luego le asociamos a la variable su tipo de la tabla
-    if isinstance(p[2], Variable):
-        print("ola")
-        if t_actual.verificarExistencia(p[2].ident):
-            print("alo1")
-            p[2].var_tipo = t_actual.tabla[f"{p[2].ident}"][1]
+    existe = existencia_variables(p[2], p.lineno(1))
+    if p[2].var_tipo != "integer":
+        p[0] = ExpUnaria(p[1], p[2], "aritmética")
+        p[0].var_tipo = "error"
+        if isinstance(p[2], Variable):
+            if existe:
+                print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[2].ident}' no tiene el tipo de variable correcto")
         else:
-            print("alo2")
-            print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[2].ident}' no está definida")
-    p[0] = ExpUnaria(p[1], p[2], "aritmética")
-
+            print(f"Error Estático en la línea {p.lineno(1)}, columna {col_num(p.lexer.lexdata, p.lexpos(1)+1)}: El tipo de dato esperado es incorrecto")
+    else:
+        p[0] = ExpUnaria(p[1], p[2], "aritmética")
+        p[0].var_tipo = "integer"
 
 # Operaciones Binarias Relacionales
 class OpBinRelacional(OperacionBinaria):
@@ -466,7 +470,7 @@ def p_expresion_parentizada(p):
     'expresion : TkParAbre expresion TkParCierra'
 
     # verificamos si es una variable y realizamos el proceso correspondiente
-    manejo_variables(p[2], p.lineno(1))
+    existencia_variables(p[2], p.lineno(1))
     p[0] = Parentizada(p[2], "parentizada")
 
 # Funcion local para el número de columnas
