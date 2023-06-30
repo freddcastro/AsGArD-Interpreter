@@ -379,11 +379,6 @@ def p_expresion_MenosUnit(p):
     if p[2].var_tipo != "integer":
         p[0] = ExpUnaria(p[1], p[2], "aritmética")
         p[0].var_tipo = "error"
-        if isinstance(p[2], Variable):
-            if existe:
-                print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[2].ident}' no tiene el tipo de variable correcto")
-        else:
-            print(f"Error Estático en la línea {p.lineno(1)}, columna {col_num(p.lexer.lexdata, p.lexpos(1)+1)}: El tipo de dato esperado es incorrecto")
     else:
         p[0] = ExpUnaria(p[1], p[2], "aritmética")
         p[0].var_tipo = "integer"
@@ -408,10 +403,16 @@ def p_expresion_OpBinRelacional(p):
 class OpBinLogica(OperacionBinaria):
     def __init__(self, izq, operador, der, tipo='lógica'):
         super().__init__(izq, operador, der, tipo)
+        self.var_tipo = "boolean" if self.izq.var_tipo == "boolean" and self.der.var_tipo == "boolean" else "error"
 
 def p_expresion_OpBinLogica(p):
     '''expresion : expresion TkConjuncion expresion
                   | expresion TkDisjuncion expresion'''
+    
+    existencia_variables(p[1], p.lineno(2))
+    
+    existencia_variables(p[3], p.lineno(2))
+
     p[0] = OpBinLogica(p[1],p[2],p[3])
 
 class Booleano(Expr):
