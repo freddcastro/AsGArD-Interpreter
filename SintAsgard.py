@@ -84,15 +84,15 @@ class TablaDeSimbolos():
             print(f'Error Estático: La variable {identificador} ya está definida')
 
     # Verifica la existencia de la variable en cada incorporación de alcance correspondiente
-    def verificarExistencia(self, identificador, existe=False):
+    def verificarExistencia(self, identificador, existe=[False, None]):
 
         for key in self.tabla.keys():
             if key == identificador:
-                existe = True
+                existe[0] = True
+                existe[1] = self.tabla
                 return existe
         if not existe:
             if self.padre is None:
-                existe = False
                 return existe
             else:
                 existe = self.padre.verificarExistencia(identificador, existe)
@@ -109,6 +109,7 @@ class TablaDeSimbolos():
         if tipo_esperado != valor.var_tipo:
             return False
         return True
+
 # Creamos la variable t_actual que indica cuál es la tabla de símbolos actual
 t_actual = TablaDeSimbolos({}, None)
 
@@ -211,19 +212,25 @@ def p_instruccion_asignacion(p):
     # Al momento de revisar la instrucción de asignación, debemos verificar que
     # la variable a utilizar exista y de no ser así, debe imprimir error
     existe = t_actual.verificarExistencia(p[1])
-    if not existe:
+    if not existe[0]:
         print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no está definida")
     else:
-        
         # Ahora, basta verificar el tipo de variable esperado
-        tipo_correcto = t_actual.verificarTipo(t_actual.tabla[f"{p[1]}"][1], p[3])
+        tipo_correcto = t_actual.verificarTipo(existe[1][f"{p[1]}"][1], p[3])
 
+        # Si la variable a asignar, existe y en la tabla tiene el tipo integer
+        # temp, corresponde a una iteracion determinada
+        if existe[1][f"{p[1]}"][1] == "integer temp":
+            print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' corresponde a una iteracion determinada, no puede modificarse")
         # Si la función de verificación devuelve error, entonces el error está en la expresión generada
-        if tipo_correcto == "error":
+        elif tipo_correcto == "error":
             print(f"Error Estático en la línea {p.lineno(1)}, columna {col_num(p.lexer.lexdata, p.lexpos(2)+2)}: Conflicto de tipos en la expresión")
 
         elif tipo_correcto is False:
             print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no tiene el tipo de variable correcto")
+        
+        
+        
 
     p[0] = Asignacion(p[1], p[3])
 
@@ -292,12 +299,51 @@ class IteracionDet(Instruccion):
         self.tipo = tipo
     
 def p_instruccion_iteraciondet(p):
-    '''instruccion :  TkWith TkIdent TkFrom expresion TkTo expresion TkRepeat instruccion TkDone
+    '''instruccion :  abrir_alcance1 TkWith TkIdent modificar_alcance TkFrom expresion TkTo expresion TkRepeat instruccion TkDone cerrar_alcance1
                     | TkFrom expresion TkTo expresion TkRepeat instruccion TkDone'''
-    if len(p) == 10:
-        p[0] = IteracionDet(p[4], p[6], p[8], p[2])
+    
+    # Si es la primera variante de la instrucción, debemos abrir y cerrar un alcance para que las instrucciones internas no puedan definir a la variable nueva que se crea
+    # al momento de hacer la instrucción
+    if len(p) == 13:
+        # Verificamos si las expresiones dadas son variables
+        existencia_variables(p[6], p.lineno(1))
+        existencia_variables(p[8], p.lineno(1))
+        if p[6].var_tipo != "integer":
+            print(f"Error Estático en la línea {p.lineno(1)}: La primera expresión del rango de la iteración determinada no tiene el tipo de dato entero")
+        
+        if p[8].var_tipo != "integer":
+            print(f"Error Estático en la línea {p.lineno(1)}: La segunda expresión del rango de la iteración determinada no tiene el tipo de dato entero")
+        p[0] = IteracionDet(p[6], p[8], p[10], p[3])
     else:
+        # Verificamos si las expresiones dadas son variables
+        existencia_variables(p[2], p.lineno(1))
+        existencia_variables(p[4], p.lineno(1))
+        if p[2].var_tipo != "integer":
+            print(f"Error Estático en la línea {p.lineno(1)}: La primera expresión del rango de la iteración determinada no tiene el tipo de dato entero")
+        
+        if p[4].var_tipo != "integer":
+            print(f"Error Estático en la línea {p.lineno(1)}: La segunda expresión del rango de la iteración determinada no tiene el tipo de dato entero")
         p[0] = IteracionDet(p[2], p[4], p[6])
+
+def p_abrir_alcance1(p):
+    "abrir_alcance1 :"
+    global t_actual
+    p[0] = TablaDeSimbolos({}, t_actual)
+    # le asignamos este valor a la variable global t_actual
+    t_actual = p[0]
+
+
+def p_modificar_alcance(p):
+    'modificar_alcance :'
+    # Accedemos al identificador
+    ident = p[-1]
+    # Lo insertamos en la tabla actual
+    t_actual.insertar(ident, "integer temp")
+
+def p_cerrar_alcance1(p):
+    "cerrar_alcance1 :"
+    global t_actual
+    t_actual = t_actual.padre
 
 # Instrucción de Entrada
 class Entrada(Instruccion):
