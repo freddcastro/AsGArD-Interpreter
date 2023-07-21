@@ -117,8 +117,9 @@ t_actual = TablaDeSimbolos({}, None)
 # si existen y, de ser así, les añadimos el valor especificado en la tabla de símbolos
 def existencia_variables(inst, linea):
     if isinstance(inst, Variable):
-        if t_actual.verificarExistencia(inst.ident,[False, None])[0]:
-            inst.var_tipo = t_actual.tabla[f"{inst.ident}"][1]
+        resultado = t_actual.verificarExistencia(inst.ident,[False, None])
+        if resultado[0]:
+            inst.var_tipo = resultado[1][f"{inst.ident}"][1]
             return  True
         else:
             print(f"Error Estático en la línea {linea}: La variable '{inst.ident}' no está definida")
