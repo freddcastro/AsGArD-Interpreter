@@ -1,7 +1,6 @@
 #!/bin/bash
 
 archivo=$1
-echo "$archivo"
 
 # Invocamos al script "main.py", pasándole el contenido del archivo como argumento
 salida=$(./ContAsgard < "$archivo")

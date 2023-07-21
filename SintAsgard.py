@@ -120,7 +120,38 @@ class TablaDeSimbolos():
             return False
         
         return True
+    # revisar
+    def buscarValor(self, identificador):
+        # Solo usar si se sabe que la variable está definida
+        
+        existe = False
+        valor = None
+        for key, value in self.tabla.items():
+            if key == identificador:
+                existe = True
+                valor = value
+                return valor
+        if not existe:
+            if self.padre is None:
+                return valor
+            else:
+                valor = self.padre.buscarValor(identificador)
+                return valor
 
+    def actualizarValor(self, identificador, valor):
+        # Buscamos la tabla donde se encuentra el identificador
+        for key, value in self.tabla.items():
+            # Si está en la tabla actual lo modificamos y salimos
+            if key == identificador:
+                existe = True
+                self.tabla[key] = valor
+                return True
+        if self.padre is None:
+            return valor
+        else:
+            self.padre.actualizarValor(identificador, valor)
+            return True
+            
 # Creamos la variable t_actual que indica cuál es la tabla de símbolos actual
 t_actual = TablaDeSimbolos({}, None)
 
