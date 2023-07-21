@@ -109,6 +109,17 @@ class TablaDeSimbolos():
         if tipo_esperado != valor.var_tipo:
             return False
         return True
+    
+    def verificarTipoEntrada(self, valor):
+        # Verificamos si el error está en la expresión
+        if valor == "error":
+            print("es de error")
+            return "error"
+
+        if valor == "canvas":
+            return False
+        
+        return True
 
 # Creamos la variable t_actual que indica cuál es la tabla de símbolos actual
 t_actual = TablaDeSimbolos({}, None)
@@ -359,6 +370,18 @@ class Entrada(Instruccion):
 
 def p_instruccion_entrada(p):
     '''instruccion : TkRead TkIdent'''
+
+    existe = t_actual.verificarExistencia(p[2], [False, None])
+    if not existe[0]:
+        print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[2]}' no está definida")
+    else:
+        # Ahora, basta verificar el tipo de variable esperado
+        tipo_correcto = t_actual.verificarTipoEntrada(existe[1][f"{p[2]}"][1])
+        print(tipo_correcto)
+        # Si la función de verificación devuelve error, entonces el error está en la expresión generada
+        
+        if tipo_correcto is False:
+            print(f"Error Estático en la línea {p.lineno(2)}: La variable '{p[2]}' no tiene el tipo de variable correcto")
     p[0] = Entrada(p[2])
 
 
