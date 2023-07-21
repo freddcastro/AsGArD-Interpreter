@@ -85,14 +85,13 @@ class TablaDeSimbolos():
             print(f'Error Estático: La variable {identificador} ya está definida')
 
     # Verifica la existencia de la variable en cada incorporación de alcance correspondiente
-    def verificarExistencia(self, identificador, existe=[False, None]):
-
+    def verificarExistencia(self, identificador, existe):
         for key in self.tabla.keys():
             if key == identificador:
                 existe[0] = True
                 existe[1] = self.tabla
                 return existe
-        if not existe:
+        if not existe[0]:
             if self.padre is None:
                 return existe
             else:
@@ -118,7 +117,7 @@ t_actual = TablaDeSimbolos({}, None)
 # si existen y, de ser así, les añadimos el valor especificado en la tabla de símbolos
 def existencia_variables(inst, linea):
     if isinstance(inst, Variable):
-        if t_actual.verificarExistencia(inst.ident):
+        if t_actual.verificarExistencia(inst.ident,[False, None])[0]:
             inst.var_tipo = t_actual.tabla[f"{inst.ident}"][1]
             return  True
         else:
@@ -216,7 +215,8 @@ def p_instruccion_asignacion(p):
 
     # Al momento de revisar la instrucción de asignación, debemos verificar que
     # la variable a utilizar exista y de no ser así, debe imprimir error
-    existe = t_actual.verificarExistencia(p[1])
+    
+    existe = t_actual.verificarExistencia(p[1], [False, None])
     if not existe[0]:
         print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no está definida")
     else:
