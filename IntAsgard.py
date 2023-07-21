@@ -2,15 +2,26 @@ from SintAsgard import  *
 
 class DivisionPorCero(Exception):
     pass
+class ErrorDeTamañoLienzo(Exception):
+    pass
+class ErrorInicializacion(Exception):
+    pass
+class ErrorSintaxis(Exception):
+    pass
 
 def interp(ast):
+    try:
+        if ast is None:
+            raise ErrorSintaxis
     
-    # Creamos una tabla de símbolos que almacena nada más las variables
-    primera_tabla = {}
-    for var in ast.declars.vars:
-        primera_tabla[var] = None
-    tabla = TablaDeSimbolos(primera_tabla, None)
-    buscar_instr(ast.instr, tabla)
+        # Creamos una tabla de símbolos que almacena nada más las variables
+        primera_tabla = {}
+        for var in ast.declars.vars:
+            primera_tabla[var] = None
+        tabla = TablaDeSimbolos(primera_tabla, None)
+        buscar_instr(ast.instr, tabla)
+    except ErrorSintaxis:
+        pass
 
 def buscar_instr(nodo, tablaS):
     '''
@@ -114,28 +125,36 @@ def evaluar_exp(expr, tablaS):
     if isinstance(expr, OpBinAritmetica):
         resultado1 = evaluar_exp(expr.izq, tablaS)
         resultado2 = evaluar_exp(expr.der, tablaS)
+        try:
+            
+            if resultado1 is None or resultado2 is None:
+                raise ErrorInicializacion
 
-        if expr.operador == "+":
-            return resultado1 + resultado2
-        
-        if expr.operador == "-":
-            return resultado1 - resultado2
+            if expr.operador == "+":
+                return resultado1 + resultado2
+            
+            if expr.operador == "-":
+                return resultado1 - resultado2
 
-        if expr.operador == "*":
-            return resultado1 * resultado2
-        
-        if expr.operador == "/":
-            try:
-                if resultado2 == 0:
-                    raise DivisionPorCero
-                else:
-                    return resultado1 / resultado2
-            except DivisionPorCero:
-                print(f"Error, División por Cero")
+            if expr.operador == "*":
+                return resultado1 * resultado2
+            
+            if expr.operador == "/":
+                try:
+                    if resultado2 == 0:
+                        raise DivisionPorCero
+                    else:
+                        return resultado1 / resultado2
+                except DivisionPorCero:
+                    print(f"Error: División por Cero")
 
-        if expr.operador == "%":
-            return resultado1 % resultado2
-
+            if expr.operador == "%":
+                return resultado1 % resultado2
+        except ErrorInicializacion:
+            if resultado1 is None and isinstance(expr.izq, Variable):
+                print(f"Error: La variable {expr.izq.ident} no está inicializada")
+            if resultado2 is None and isinstance(expr.der, Variable):
+                print(f"Error: La variable {expr.der.ident} no está inicializada")
 
     
     # Expresiones relacionadas a BOOLEANOS
@@ -148,46 +167,134 @@ def evaluar_exp(expr, tablaS):
     if isinstance(expr, OpBinLogica):
         resultado1 = evaluar_exp(expr.izq, tablaS)
         resultado2 = evaluar_exp(expr.der, tablaS)
+        try:
+            
+            if resultado1 is None or resultado2 is None:
+                raise ErrorInicializacion
+            
+            if expr.operador == "/\\":
+                return resultado1 and resultado2
+            
+            if expr.operador == "\\/":
+                return resultado1 or resultado2
+        except ErrorInicializacion:
+            if resultado1 is None and isinstance(expr.izq, Variable):
+                print(f"Error: La variable {expr.izq.ident} no está inicializada")
+            if resultado2 is None and isinstance(expr.der, Variable):
+                print(f"Error: La variable {expr.der.ident} no está inicializada")
 
-        if expr.operador == "/\\":
-            return resultado1 and resultado2
-        
-        if expr.operador == "\\/":
-            return resultado1 or resultado2
-    
     # Expresiones RELACIONALES
     if isinstance(expr, OpBinRelacional):
         resultado1 = evaluar_exp(expr.izq, tablaS)
         resultado2 = evaluar_exp(expr.der, tablaS)
+        
+        try:
+            if resultado1 is None or resultado2 is None:
+                raise ErrorInicializacion
+            if expr.operador == "=":
+                return resultado1 == resultado2
+            
+            if expr.operador == "/=":
+                return resultado1 != resultado2
+            
+            if expr.operador == "<":
+                return resultado1 < resultado2
+            
+            if expr.operador == "<=":
+                return resultado1 <= resultado2
+            
+            if expr.operador == ">":
+                return resultado1 > resultado2
+            
+            if expr.operador == ">=":
+                return resultado1 >= resultado2
+        except ErrorInicializacion:
+            if resultado1 is None and isinstance(expr.izq, Variable):
+                print(f"Error: La variable {expr.izq.ident} no está inicializada")
+            if resultado2 is None and isinstance(expr.der, Variable):
+                print(f"Error: La variable {expr.der.ident} no está inicializada")
 
-        if expr.operador == "=":
-            return resultado1 == resultado2
-        
-        if expr.operador == "/=":
-            return resultado1 != resultado2
-        
-        if expr.operador == "<":
-            return resultado1 < resultado2
-        
-        if expr.operador == "<=":
-            return resultado1 <= resultado2
-        
-        if expr.operador == ">":
-            return resultado1 > resultado2
-        
-        if expr.operador == ">=":
-            return resultado1 >= resultado2
+    # Expresiones relacionadas a CANVAS
+    if isinstance(expr, Canvas):
+        if expr.valor[1] == ".":
+            return " "
+        return expr.valor[1]
+    
+    if isinstance(expr, OpBinLienzo):
+        resultado1 = evaluar_exp(expr.izq, tablaS)
+        resultado2 = evaluar_exp(expr.der, tablaS)
+        try:
+            if resultado1 is None or resultado2 is None:
+                raise ErrorInicializacion
+            if expr.operador == ":":
+                try:
+
+                    if resultado1 == "e":
+                        return resultado2
+                    
+                    elif resultado2 == "e":
+                        return resultado1
+                    
+                    elif len(resultado1) != len(resultado2):
+                        raise ErrorDeTamañoLienzo
+                    
+                    return resultado1 + resultado2
+                except ErrorDeTamañoLienzo: 
+                    print("Error: los lienzos combinados no tienen la misma dimensión")
+            
+            if expr.operador == "|":
+                try:
+                    if resultado1 == "e":
+                        return resultado2
+                    
+                    elif resultado2 == "e":
+                        return resultado1
+                    
+                    elif len(resultado1) != len(resultado2):
+                        raise ErrorDeTamañoLienzo
+                    return resultado1 + '\n' + resultado2
+                except ErrorDeTamañoLienzo: 
+                    print("Error: los lienzos combinados no tienen la misma dimensión")
+            
+            if expr.operador == "$":
+                return resultado1 < resultado2
+            
+            if expr.operador == "'":
+                return resultado1 <= resultado2
+            
+        except ErrorInicializacion:
+            if resultado1 is None and isinstance(expr.izq, Variable):
+                print(f"Error: La variable {expr.izq.ident} no está inicializada")
+            if resultado2 is None and isinstance(expr.der, Variable):
+                print(f"Error: La variable {expr.der.ident} no está inicializada")
 
     # Expresiones Unarias de todos los tipos
     if isinstance(expr, ExpUnaria):
-        if expr.tipo == "aritmética":
-            resultado = evaluar_exp(expr.val, tablaS)
-            return -resultado
-        if expr.tipo == "booleana":
-            resultado = evaluar_exp(expr.val, tablaS)
-            return not resultado
+        resultado = evaluar_exp(expr.val, tablaS)
+        try:
+            if resultado is None:
+                raise ErrorInicializacion
+            if expr.tipo == "aritmética":
+                return -resultado
+            if expr.tipo == "booleana":
+                return not resultado
+            if expr.tipo == "canvas":
+                if expr.operador == "$":
+                    if resultado == "/":
+                        return "\\"
+                    elif resultado == "\\":
+                        return "/"
+                    elif resultado == "_":
+                        return "|"
+                    elif resultado == "|":
+                        return "_"
+                    elif resultado == " ":
+                        return " "
+                #TODO el operador de transposicion
+                # if expr.operador == "'":
 
-
+        except:
+            print(f"Error: La variable {expr.val.ident} no está inicializada")
 
 
 
