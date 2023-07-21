@@ -141,7 +141,11 @@ def outAST(ast, espacios):
 
         else:
             if not isinstance(ast.val, Parentizada):
-                print((" "* espacios) + f"  - val: {ast.val.valor}")
+                if not isinstance(ast.val, ExpUnaria):
+                    print((" "* espacios) + f"  - val: {ast.val.valor}")
+                else:
+                    print((" "* espacios) + "  - val:")
+                    outAST(ast.val, espacios + 4)
             else:
                 print((" "* espacios) + "  - val:")
                 outAST(ast.val, espacios + 4)
