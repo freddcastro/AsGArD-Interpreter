@@ -1,0 +1,10 @@
+#!/bin/bash
+
+archivo=$1
+echo "$archivo"
+
+# Invocamos al script "main.py", pasándole el contenido del archivo como argumento
+salida=$(./ContAsgard < "$archivo")
+
+# Imprimimos la salida del script main.py en la salida estándar del script de Bash
+echo "$salida"
