@@ -52,12 +52,13 @@ declaracion -> identificadores TkOf TkType TkInteger
 
 # Establecemos la precedencia de las operaciones
 precedence = (
-    ('nonassoc', 'TkMayor', 'TkMenor', 'TkMayorIgual',
-     'TkMenorIgual', 'TkIgual', 'TkDesigual', 'TkAsignacion'), # Operadores No Asociativos
+    ('nonassoc', 'TkAsignacion'), # Operadores No Asociativos
     
     ('left', 'TkMas', 'TkMenos', 'TkDisjuncion', 'TkConcatHorizontal','TkConcatVertical',) ,
     
     ('left', 'TkMult', 'TkDiv', 'TkMod', 'TkConjuncion', 'TkRotacion', 'TkPuntoYComa'), 
+
+    ('left', 'TkMayor', 'TkMenor', 'TkMayorIgual', 'TkMenorIgual', 'TkIgual', 'TkDesigual'),
 
     ('right', 'MenosUnit', 'TkTransposicion',), # Token temporal MenosUnit
     
