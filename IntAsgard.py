@@ -12,7 +12,6 @@ def interp(ast):
     tabla = TablaDeSimbolos(primera_tabla, None)
     buscar_instr(ast.instr, tabla)
 
-
 def buscar_instr(nodo, tablaS):
     '''
     Función que divide el nodo actual del AST en 3 partes:
@@ -83,6 +82,8 @@ def evaluar_ins_terminal(nodo, tablaS):
         # Ahora, asignamos el resultado a la variable en la tabla correspondiente
         tablaS.actualizarValor(nodo.var, resultado)
 
+        print(tablaS.buscarValor(nodo.var))
+
     if isinstance(nodo, Entrada):
         print("entrada")
     
@@ -96,15 +97,20 @@ def evaluar_exp(expr, tablaS):
     Si existen variables debe buscar su valor en la tabla de símbolos y de no tener valor se trata
     de un error dinámico que debe ser reportado.
     '''
+    
+    if isinstance(expr, Parentizada):
+        resultado = evaluar_exp(expr.interna, tablaS)
+        return resultado
 
     if isinstance(expr, Variable):
         # Buscamos el valor de la variable en la tabla de símbolos y si no tiene reportamos un error
         resultado = tablaS.buscarValor(expr.ident)
         return resultado
         
+    # Expresiones relacionadas a ENTEROS
     if isinstance(expr, Numero):
         return int(expr.valor)
-    
+
     if isinstance(expr, OpBinAritmetica):
         resultado1 = evaluar_exp(expr.izq, tablaS)
         resultado2 = evaluar_exp(expr.der, tablaS)
@@ -131,11 +137,56 @@ def evaluar_exp(expr, tablaS):
             return resultado1 % resultado2
 
 
+    
+    # Expresiones relacionadas a BOOLEANOS
+    if isinstance(expr, Booleano):
+        if expr.valor == "true":
+            return True
+        if expr.valor == "false":
+            return False
+        
+    if isinstance(expr, OpBinLogica):
+        resultado1 = evaluar_exp(expr.izq, tablaS)
+        resultado2 = evaluar_exp(expr.der, tablaS)
 
-    if isinstance(expr, Variable):
-        print("asas")
+        if expr.operador == "/\\":
+            return resultado1 and resultado2
+        
+        if expr.operador == "\\/":
+            return resultado1 or resultado2
+    
+    # Expresiones RELACIONALES
+    if isinstance(expr, OpBinRelacional):
+        resultado1 = evaluar_exp(expr.izq, tablaS)
+        resultado2 = evaluar_exp(expr.der, tablaS)
 
-    print("expresioness")
+        if expr.operador == "=":
+            return resultado1 == resultado2
+        
+        if expr.operador == "/=":
+            return resultado1 != resultado2
+        
+        if expr.operador == "<":
+            return resultado1 < resultado2
+        
+        if expr.operador == "<=":
+            return resultado1 <= resultado2
+        
+        if expr.operador == ">":
+            return resultado1 > resultado2
+        
+        if expr.operador == ">=":
+            return resultado1 >= resultado2
+
+    # Expresiones Unarias de todos los tipos
+    if isinstance(expr, ExpUnaria):
+        if expr.tipo == "aritmética":
+            resultado = evaluar_exp(expr.val, tablaS)
+            return -resultado
+        if expr.tipo == "booleana":
+            resultado = evaluar_exp(expr.val, tablaS)
+            return not resultado
+
 
 
 

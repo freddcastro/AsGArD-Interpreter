@@ -105,7 +105,8 @@ class TablaDeSimbolos():
         # Verificamos si el error está en la expresión
         if valor.var_tipo == "error":
             return "error"
-
+        if valor.var_tipo == "errorop":
+                    return "errorop"
         if tipo_esperado != valor.var_tipo:
             return False
         return True
@@ -273,6 +274,9 @@ def p_instruccion_asignacion(p):
         # Si la función de verificación devuelve error, entonces el error está en la expresión generada
         elif tipo_correcto == "error":
             print(f"Error Estático en la línea {p.lineno(1)}, columna {col_num(p.lexer.lexdata, p.lexpos(2)+2)}: Conflicto de tipos en la expresión")
+        
+        elif tipo_correcto == "errorop":
+            print(f"Error Estático en la línea {p.lineno(1)}, columna {col_num(p.lexer.lexdata, p.lexpos(2)+2)}: Este operador no puede ser usado para los tipos de variables declarados")
 
         elif tipo_correcto is False:
             print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no tiene el tipo de variable correcto")
@@ -312,7 +316,10 @@ def p_instruccion_condicional(p):
     # Verificamos si la expresión dada es una variable existente
     existencia_variables(p[2], p.lineno(1))
     if p[2].var_tipo != "boolean":
-        print(f"Error Estático en la línea {p.lineno(1)}: La expresión en la guardia del condicional no tiene el tipo de dato booleano")
+        if p[2].var_tipo == "errorop":
+            print(f"Error Estático en la línea {p.lineno(1)}: La expresión en la guardia del condicional tiene un operador incorrecto")
+        else:
+            print(f"Error Estático en la línea {p.lineno(1)}: La expresión en la guardia del condicional no tiene el tipo de dato booleano")
     if len(p) == 6:
         p[0] = Condicional(p[2], p[4])
     else:
@@ -506,7 +513,18 @@ def p_expresion_MenosUnit(p):
 class OpBinRelacional(OperacionBinaria):
     def __init__(self, izq, operador, der, tipo="relacional"):
         super().__init__(izq, operador, der, tipo)
-        self.var_tipo = "boolean" if self.izq.var_tipo == self.der.var_tipo else "error"
+        resultado = "boolean"
+
+        if self.izq.var_tipo != self.der.var_tipo:
+            resultado = "error"
+
+        if (self.izq.var_tipo == "boolean" and self.der.var_tipo == "boolean") and self.operador not in ["=", "/="]:
+            resultado = "errorop"
+
+        if (self.izq.var_tipo == "canvas" and self.der.var_tipo == "canvas") and self.operador not in ["=", "/="]:
+            resultado = "errorop"
+
+        self.var_tipo = resultado
 
 def p_expresion_OpBinRelacional(p):
     '''expresion : expresion TkMenor expresion
