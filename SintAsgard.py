@@ -139,8 +139,12 @@ class Incorporacion(Instruccion):
         self.tipo = tipo
 
 def p_instruccion_incorporacion(p):
-    'instruccion : abrir_alcance TkUsing declaracion TkBegin instruccion TkEnd cerrar_alcance'
-    p[0] = Incorporacion(p[3], p[5])
+    '''instruccion : abrir_alcance TkUsing declaracion TkBegin instruccion TkEnd cerrar_alcance
+                    | TkBegin instruccion TkEnd'''
+    if len(p) == 4:
+        p[0] = Incorporacion(None, p[2])
+    else:
+        p[0] = Incorporacion(p[3], p[5])
     
 def p_abrir_alcance(p):
     "abrir_alcance :"
