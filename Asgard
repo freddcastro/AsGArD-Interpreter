@@ -2,8 +2,6 @@
 
 archivo=$1
 
-# Invocamos al script "main.py", pasándole el contenido del archivo como argumento
-salida=$(./ContAsgard < "$archivo")
+# Invocamos al script ContAsgard, pasándole el contenido el archivo como argumento
+source ContAsgard $1
 
-# Imprimimos la salida del script main.py en la salida estándar del script de Bash
-echo "$salida"

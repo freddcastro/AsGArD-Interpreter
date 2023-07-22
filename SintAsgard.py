@@ -417,7 +417,6 @@ def p_instruccion_entrada(p):
     else:
         # Ahora, basta verificar el tipo de variable esperado
         tipo_correcto = t_actual.verificarTipoEntrada(existe[1][f"{p[2]}"][1])
-        print(tipo_correcto)
         # Si la función de verificación devuelve error, entonces el error está en la expresión generada
         
         if tipo_correcto is False:

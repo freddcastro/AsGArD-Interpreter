@@ -12,6 +12,8 @@ class ErrorSintaxis(Exception):
     pass
 class ErrorEstatico(Exception):
     pass
+class ErrorDeEntrada(Exception):
+    pass
 
 def interp(ast):
     try:
@@ -52,18 +54,28 @@ def buscar_instr(nodo, tablaS):
         buscar_instr(nodo.instr, tabla)
 
     if isinstance(nodo, IteracionDet):
-        buscar_instr(nodo.instr,tablaS)
+        if nodo.cont is None:
+            cantidad = evaluar_exp(nodo.arit2) - evaluar_exp(nodo.arit1) + 1
+            print(cantidad, 'asdasd')
 
     if isinstance(nodo, IteracionInd):
-        buscar_instr(nodo.instr, tablaS)
+        while True:
+            if evaluar_exp(nodo.guardia):
+                buscar_instr(nodo.instr, tablaS)
+            else:
+                break
     
     if isinstance(nodo, Condicional):
-        buscar_instr(nodo.exito, tablaS)
-        if nodo.fracaso is not None:
+        print(111111)
+        resultado_guardia = evaluar_exp(nodo.guardia, tablaS)
+        if resultado_guardia is True:
+            print(2222222)
             buscar_instr(nodo.exito, tablaS)
-    
-    if isinstance(nodo, IteracionInd):
-        buscar_instr(nodo.instr, tablaS)
+        else:
+            print(33333333)
+            if nodo.fracaso is not None:
+                print(4444444444)
+                buscar_instr(nodo.exito, tablaS)
 
     # Instrucciones Terminales
     if isinstance(nodo, Asignacion):
@@ -105,11 +117,58 @@ def evaluar_ins_terminal(nodo, tablaS):
             pass
 
     if isinstance(nodo, Entrada):
-        print("entrada")
+            # recibimos la entrada
+            try:
+                entrada =input()
+                entrada = int(entrada)
+                tablaS.actualizarValor(nodo.var, entrada)
+            except:
+                # No es un entero, así que verificamos que sea un booleano
+                if entrada == "true" or entrada == "false":
+                    tablaS.actualizarValor(nodo.var, entrada)
+                else:
+                    try:
+                        raise ErrorDeEntrada
+                    except:
+                        print("Error al ingresar valor de entrada, tipo incorrecto")
+
     
     if isinstance(nodo, Salida):
         salida = evaluar_exp(nodo.expr, tablaS)
-        print(salida)
+        if salida is None:
+            pass
+        else:
+            # verificamos si es un canvas para formatear la salida
+            if isinstance(salida, np.ndarray):
+                # Es una casilla sola
+                if salida.size == 1:
+                    print(salida[0])
+                # Es un vector horizontal
+                if len(salida.shape) == 1:
+                    columna = ''
+                    for x in salida:
+                        if x == '':
+                            pass
+                        else:
+                            columna += x
+                    print(columna)
+                # Es un vector vertical
+                if len(salida.shape) == 2 and salida.shape[1] == 1:
+                    for x in np.nditer(salida):
+                        if x == '':
+                            pass
+                        else:
+                            print(x)
+                # Es una matriz
+                if len(salida.shape) == 2 and (salida.shape[0] > 1 and salida.shape[1] > 1):
+                    for i in range(salida.shape[0]):
+                        fila = ''
+                        for j in range(salida.shape[1]):
+                            fila += salida[i][j]
+                        print(fila)
+            else:
+                print(salida)
+
 
 def evaluar_exp(expr, tablaS):
     '''
@@ -246,9 +305,7 @@ def evaluar_exp(expr, tablaS):
             
             if expr.operador == ":":
                 try:
-
                     if resultado1[0] == "e" and resultado2[0] == "e":
-                        
                         return np.array(['e'])                       
 
                     if resultado1[0] == "e":
@@ -269,7 +326,8 @@ def evaluar_exp(expr, tablaS):
                         raise ErrorDeTamañoLienzo
                     
                     # eliminamos los posibles vacios generados:
-                    salida = np.delete(np.hstack((resultado1, resultado2)), np.where(np.hstack((resultado1, resultado2)) == ''))
+                    salida = np.hstack((resultado1, resultado2))
+                    
                     return salida
                 except ErrorDeTamañoLienzo: 
                     print("Error: los lienzos combinados no tienen la misma dimensión")
@@ -280,6 +338,7 @@ def evaluar_exp(expr, tablaS):
                         return np.array(['e'])                       
 
                     if resultado1[0] == "e":
+
                         # Creamos la matriz vacía a partir del tamaño de la no vacía
                         vacia = np.empty(resultado2.shape, str)
                         
@@ -287,6 +346,7 @@ def evaluar_exp(expr, tablaS):
                         return np.vstack((vacia, resultado2))
                     
                     elif resultado2[0] == "e":
+
                         # Creamos la matriz vacía a partir del tamaño de la no vacía
                         vacia = np.empty(resultado1.shape, str)
 
@@ -295,7 +355,6 @@ def evaluar_exp(expr, tablaS):
 
                     elif resultado1.shape != resultado2.shape:
                         raise ErrorDeTamañoLienzo
-                    
                     return np.vstack((resultado1, resultado2))
                 except ErrorDeTamañoLienzo: 
                     print("Error: los lienzos combinados no tienen la misma dimensión")

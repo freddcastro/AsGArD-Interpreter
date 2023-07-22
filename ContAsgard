@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Leemos el archivo de entrada desde la entrada estándar y lo guardamos en una variable
-archivo=$(cat)
+archivo=$1
 
 # Invocamos al script "main.py", pasándole el contenido del archivo como argumento
 salida=$(python3 main.py "$archivo")
