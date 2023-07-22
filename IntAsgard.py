@@ -10,6 +10,8 @@ class ErrorInicializacion(Exception):
     pass
 class ErrorSintaxis(Exception):
     pass
+class ErrorEstatico(Exception):
+    pass
 
 def interp(ast):
     try:
@@ -88,15 +90,19 @@ def evaluar_ins_terminal(nodo, tablaS):
     '''
     
     if isinstance(nodo, Asignacion):
-        # Primeramente, evaluamos la expresion
+        try:
 
-        resultado = evaluar_exp(nodo.val, tablaS)
+            if nodo.val == 'error':
+                raise ErrorEstatico
+            else:
+                # Primeramente, evaluamos la expresion
 
-        # Ahora, asignamos el resultado a la variable en la tabla correspondiente
-        tablaS.actualizarValor(nodo.var, resultado)
+                resultado = evaluar_exp(nodo.val, tablaS)
 
-        print(tablaS.buscarValor(nodo.var))
-        print()
+                # Ahora, asignamos el resultado a la variable en la tabla correspondiente
+                tablaS.actualizarValor(nodo.var, resultado)
+        except ErrorEstatico:
+            pass
 
     if isinstance(nodo, Entrada):
         print("entrada")
@@ -146,10 +152,16 @@ def evaluar_exp(expr, tablaS):
                 try:
                     if resultado2 == 0:
                         raise DivisionPorCero
+                    elif resultado2 in [True, False]:
+                        raise TypeError
+                    elif resultado1 in [True, False]:
+                        raise TypeError
                     else:
                         return resultado1 / resultado2
                 except DivisionPorCero:
                     print(f"Error: División por Cero")
+                except TypeError:
+                    print("Error: División errónea de tipos")
 
             if expr.operador == "%":
                 return resultado1 % resultado2

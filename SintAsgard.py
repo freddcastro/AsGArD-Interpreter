@@ -280,11 +280,13 @@ def p_instruccion_asignacion(p):
 
         elif tipo_correcto is False:
             print(f"Error Estático en la línea {p.lineno(1)}: La variable '{p[1]}' no tiene el tipo de variable correcto")
+            existe[1][f"{p[1]}"][1] = 'error'
         
         
-        
-
-    p[0] = Asignacion(p[1], p[3])
+    if existe[1][f"{p[1]}"][1] == 'error':
+        p[0] = Asignacion(p[1], 'error')
+    else:
+        p[0] = Asignacion(p[1], p[3])
 
 # Instrucción de Secuenciación
 class Secuenciacion(Instruccion):
