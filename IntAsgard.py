@@ -1,4 +1,6 @@
+import numpy as np
 from SintAsgard import  *
+
 
 class DivisionPorCero(Exception):
     pass
@@ -94,6 +96,7 @@ def evaluar_ins_terminal(nodo, tablaS):
         tablaS.actualizarValor(nodo.var, resultado)
 
         print(tablaS.buscarValor(nodo.var))
+        print()
 
     if isinstance(nodo, Entrada):
         print("entrada")
@@ -191,6 +194,7 @@ def evaluar_exp(expr, tablaS):
         try:
             if resultado1 is None or resultado2 is None:
                 raise ErrorInicializacion
+            
             if expr.operador == "=":
                 return resultado1 == resultado2
             
@@ -217,50 +221,73 @@ def evaluar_exp(expr, tablaS):
     # Expresiones relacionadas a CANVAS
     if isinstance(expr, Canvas):
         if expr.valor[1] == ".":
-            return " "
-        return expr.valor[1]
+            return np.array([" "])
+        return np.array([expr.valor[1]])
     
     if isinstance(expr, OpBinLienzo):
         resultado1 = evaluar_exp(expr.izq, tablaS)
         resultado2 = evaluar_exp(expr.der, tablaS)
+
         try:
             if resultado1 is None or resultado2 is None:
                 raise ErrorInicializacion
+            
             if expr.operador == ":":
                 try:
 
-                    if resultado1 == "e":
-                        return resultado2
+                    if resultado1[0] == "e" and resultado2[0] == "e":
+                        
+                        return np.array(['e'])                       
+
+                    if resultado1[0] == "e":
+                        # Creamos la matriz vacía a partir del tamaño de la no vacía
+                        vacia = np.empty(resultado2.shape, str)
+                        
+                        # devolvemos la concatenación horizontal
+                        return np.hstack((vacia, resultado2))
                     
-                    elif resultado2 == "e":
-                        return resultado1
-                    
-                    elif len(resultado1) != len(resultado2):
+                    elif resultado2[0] == "e":
+                        # Creamos la matriz vacía a partir del tamaño de la no vacía
+                        vacia = np.empty(resultado1.shape, str)
+
+                        # devolvemos la concatenación horizontal
+                        return np.hstack((vacia, resultado1))
+
+                    elif resultado1.shape != resultado2.shape:
                         raise ErrorDeTamañoLienzo
                     
-                    return resultado1 + resultado2
+                    # eliminamos los posibles vacios generados:
+                    salida = np.delete(np.hstack((resultado1, resultado2)), np.where(np.hstack((resultado1, resultado2)) == ''))
+                    return salida
                 except ErrorDeTamañoLienzo: 
                     print("Error: los lienzos combinados no tienen la misma dimensión")
             
             if expr.operador == "|":
                 try:
-                    if resultado1 == "e":
-                        return resultado2
+                    if resultado1[0] == "e" and resultado2[0] == "e":
+                        return np.array(['e'])                       
+
+                    if resultado1[0] == "e":
+                        # Creamos la matriz vacía a partir del tamaño de la no vacía
+                        vacia = np.empty(resultado2.shape, str)
+                        
+                        # devolvemos la concatenación vertical
+                        return np.vstack((vacia, resultado2))
                     
-                    elif resultado2 == "e":
-                        return resultado1
-                    
-                    elif len(resultado1) != len(resultado2):
+                    elif resultado2[0] == "e":
+                        # Creamos la matriz vacía a partir del tamaño de la no vacía
+                        vacia = np.empty(resultado1.shape, str)
+
+                        # devolvemos la concatenación vertical
+                        return np.vstack((vacia, resultado1))
+
+                    elif resultado1.shape != resultado2.shape:
                         raise ErrorDeTamañoLienzo
-                    return resultado1 + '\n' + resultado2
+                    
+                    return np.vstack((resultado1, resultado2))
                 except ErrorDeTamañoLienzo: 
                     print("Error: los lienzos combinados no tienen la misma dimensión")
-            
-            if expr.operador == "$":
-                return resultado1 < resultado2
-            
-            if expr.operador == "'":
-                return resultado1 <= resultado2
+
             
         except ErrorInicializacion:
             if resultado1 is None and isinstance(expr.izq, Variable):
@@ -278,22 +305,31 @@ def evaluar_exp(expr, tablaS):
                 return -resultado
             if expr.tipo == "booleana":
                 return not resultado
-            if expr.tipo == "canvas":
+            if expr.tipo == "lienzo":
                 if expr.operador == "$":
-                    if resultado == "/":
-                        return "\\"
-                    elif resultado == "\\":
-                        return "/"
-                    elif resultado == "_":
-                        return "|"
-                    elif resultado == "|":
-                        return "_"
-                    elif resultado == " ":
-                        return " "
-                #TODO el operador de transposicion
-                # if expr.operador == "'":
+                    resultado = np.rot90(resultado, k=-1)
+                    for i in range(resultado.shape[0]):
+                        for j in range(resultado.shape[1]):
+                            if resultado[i][j] == "/":
+                                resultado[i][j] = "\\"
 
-        except:
+                            elif resultado[i][j] == "\\":
+                                resultado[i][j] = "/"
+                            
+                            elif resultado[i][j] == "_":
+                                resultado[i][j] = "|"
+                            
+                            elif resultado[i][j] == "|":
+                                resultado[i][j] = "_"
+                            
+                            elif resultado[i][j] == " ":
+                                pass
+                    return resultado
+                
+                if expr.operador == "'":
+                    return resultado.transpose()
+
+        except ErrorInicializacion:
             print(f"Error: La variable {expr.val.ident} no está inicializada")
 
 
