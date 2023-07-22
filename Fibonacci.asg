@@ -1,0 +1,24 @@
+using n, fib0, fib1, fibn of type integer begin
+    read(n)
+    fib0 := 0;
+    fib1 := 1;
+    if n == 0 \/ n ==1 then
+        if n == 0 then
+            print(fib0);
+        otherwise
+            print(fib1);
+        done
+    otherwise
+        with i from 2 to n repeat
+            i := fib0 + fib1;
+            fib0 := fib1;
+            fib1 := i;
+        done
+        fibn = fib1
+    done
+    print(fibn)
+end
+
+
+
+

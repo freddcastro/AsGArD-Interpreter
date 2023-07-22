@@ -1,0 +1,28 @@
+using n, h, v, cadenah, espacios of type canvas begin
+    read(n)
+    h := <_>;
+    v := <|>;
+    cadenah := <_>:<_>:<_>;
+    espacios := <.>;
+    if n < 3 then 
+        print(false);
+    done
+    if n == 3 then
+        print(cadenah);
+        with i from 0 to n-2 repeat
+            print(v : espacios :v);
+        done
+        print(cadenah);
+    done
+    if n > 3 then
+        with i from 4 to n repeat
+            cadenah := cadenah : <_>;
+            espacios := espacios : <.>;
+        done
+        print(cadenah);
+        with i from 0 to n-2 repeat
+            print(<v> : espacios : <v>);
+        done
+        print(cadenah);  
+    done  
+end
